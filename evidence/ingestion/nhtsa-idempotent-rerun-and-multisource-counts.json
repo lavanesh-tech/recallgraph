@@ -1,0 +1,70 @@
+{
+  "recorded_at": "2026-09-26T15:57:30Z",
+  "git_commit": "c63133b",
+  "environment": "local macOS arm64, Postgres 17 (Docker)",
+  "commands": [
+    "uv run recallgraph ingest nhtsa",
+    "uv run recallgraph normalize nhtsa (run twice)"
+  ],
+  "source_api": "https://data.transportation.gov/resource/6axg-epim.json",
+  "ingestion": {
+    "run_id": "39305760-18ca-41f4-ba15-fe469b050686",
+    "source": "nhtsa",
+    "status": "succeeded",
+    "batches": 7,
+    "records_seen": 30321,
+    "records_inserted": 0,
+    "records_unchanged": 30321,
+    "duration_s": 15.215,
+    "records_per_s": 1992.8
+  },
+  "normalization": {
+    "source": "nhtsa",
+    "normalizer_version": "nhtsa-1",
+    "force": false,
+    "seen": 30321,
+    "created": 0,
+    "updated": 0,
+    "unchanged": 30321,
+    "rejected": 0,
+    "duration_s": 2.823,
+    "records_per_s": 10740.7
+  },
+  "idempotent_renormalization": {
+    "source": "nhtsa",
+    "normalizer_version": "nhtsa-1",
+    "force": false,
+    "seen": 30321,
+    "created": 0,
+    "updated": 0,
+    "unchanged": 30321,
+    "rejected": 0,
+    "duration_s": 2.724,
+    "records_per_s": 11131.1
+  },
+  "multi_source_dataset": {
+    "generated_at": "2026-09-26T15:57:53.399185+00:00",
+    "sources": {
+      "cpsc": {
+        "distinct_records": 10027,
+        "stored_versions": 10027
+      },
+      "nhtsa": {
+        "distinct_records": 30321,
+        "stored_versions": 30321
+      }
+    },
+    "ingestion_runs_by_status": {
+      "succeeded": 6
+    },
+    "normalized": {
+      "recalls": 40348,
+      "recall_products": 42248,
+      "recall_hazards": 35650,
+      "recall_remedies": 36292,
+      "recall_identifiers": 6421,
+      "recall_company_links": 53095,
+      "companies": 19917
+    }
+  }
+}
