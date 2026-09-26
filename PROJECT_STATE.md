@@ -83,7 +83,6 @@ None.
 
 ## Measured metrics
 - Semantic retrieval experiment (test split): F1 0.7802 -> 0.7784, recall 0.986 -> 1.0, hit@1 0.930 -> 0.937; rejected by pre-registered rule (evidence/experiments/semantic-retrieval-step19.json).
-- Semantic retrieval experiment (test split): F1 0.7802 -> 0.7784, recall 0.986 -> 1.0, hit@1 0.930 -> 0.937; rejected by pre-registered rule (evidence/experiments/semantic-retrieval-step19.json).
 - Matching (eval-v1 held-out test split, strict): precision 0.226 -> 0.646, F1 0.368 -> 0.780, recall 0.986, hit@1 0.888 -> 0.930, negative-query FPR 0.0 (evidence/evaluation/tuning-match-1-vs-match-2.json).
 - Identifier matching: precision 1.0, recall 1.0 (150 cases).
 - Data: 40,348 normalized recalls from CPSC (10,027) + NHTSA (30,321).

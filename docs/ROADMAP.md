@@ -24,8 +24,8 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 18 | Event-driven Radar (justification check first) | done |
 | 19 | Semantic retrieval experiment | done (rejected by pre-registered rule) |
 | 20 | Grounded AI explanations | planned |
-| 21 | Frontend foundation (HTML/CSS/JavaScript, no framework) | planned |
-| 22 | Frontend product features (HTML/CSS/JavaScript) | planned |
+| 21 | Frontend foundation (React + JavaScript + HTML/CSS via Vite, no Next.js) | planned |
+| 22 | Frontend product features (React) | planned |
 | 23 | Security hardening | planned |
 | 24 | End-to-end testing and coverage | planned |
 | 25 | Full containerization | planned |

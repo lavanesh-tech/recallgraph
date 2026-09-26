@@ -127,18 +127,6 @@ but lowered precision. Decision: keep match-2; the embedding index and variants 
 as a reproducible experiment (`recallgraph eval run --variant ...`), not in the API.
 Evidence: `evidence/experiments/semantic-retrieval-step19.json`.
 
-## D-016 Frontend without a framework
-The UI is plain HTML, CSS and JavaScript (ES modules, fetch) served by FastAPI.
-No React/Next.js: the product needs a handful of pages over an existing REST API.
-
-## D-015 Semantic retrieval (pgvector) not adopted
-Pre-registered experiment (`docs/experiments/semantic-retrieval.md`), eval-v1 test split:
-strict F1 0.7802 (match-2) vs 0.7784 (both semantic variants): -0.0018, below the +0.02 bar.
-Semantic candidates raised recall 0.986 -> 1.0 and hit@1 0.930 -> 0.937 at ~+2-7% latency,
-but lowered precision. Decision: keep match-2; the embedding index and variants remain only
-as a reproducible experiment (`recallgraph eval run --variant ...`), not in the API.
-Evidence: `evidence/experiments/semantic-retrieval-step19.json`.
-
 ## D-016 Frontend: React + JavaScript (Vite), no Next.js
 A single-page React app (JavaScript, HTML, CSS) built with Vite, talking to the existing
 FastAPI REST API. No Next.js: server-side rendering and its server runtime are not needed
