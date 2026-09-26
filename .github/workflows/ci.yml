@@ -144,3 +144,35 @@ jobs:
         with:
           name: playwright-report
           path: frontend/playwright-report
+
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          load: true
+          tags: recallgraph-api:ci
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+      - name: Build web image
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          load: true
+          tags: recallgraph-web:ci
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+      - name: API image runs as non-root
+        run: test "$(docker run --rm --entrypoint id recallgraph-api:ci -u)" = "10001"
+      - name: Scan images (fixable CRITICAL)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: image
+          image-ref: recallgraph-api:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"

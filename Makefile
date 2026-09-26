@@ -60,3 +60,9 @@ coverage:
 	cd frontend && npm run coverage
 e2e:
 	cd frontend && npm run e2e
+
+.PHONY: stack-up stack-down
+stack-up:
+	docker compose -f compose.stack.yml up -d --build --wait
+stack-down:
+	docker compose -f compose.stack.yml down

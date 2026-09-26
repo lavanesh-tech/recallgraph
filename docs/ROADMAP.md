@@ -28,7 +28,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 22 | Frontend product features (React) | done |
 | 23 | Security hardening | done |
 | 24 | End-to-end testing and coverage | done |
-| 25 | Full containerization | planned |
+| 25 | Full containerization | done |
 | 26 | Observability | planned |
 | 27 | Performance benchmarks | planned |
 | 28 | AWS infrastructure with Terraform | planned |

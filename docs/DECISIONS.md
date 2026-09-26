@@ -146,3 +146,10 @@ for a handful of authenticated pages over an existing API.
 Pure ASGI middleware for security headers, a 64 KiB body limit and an in-process auth rate
 limiter; CORS closed by default; docs disabled outside local/test. CI adds gitleaks, pip-audit
 and npm audit. No external WAF/Redis yet: single instance; limitation recorded in docs/SECURITY.md.
+
+## D-019 Containers
+Multi-stage images: API/worker/migrations share one Python image (uv-locked, no dev deps,
+non-root uid 10001, read-only root filesystem, all capabilities dropped); the web image is
+the Vite build on unprivileged nginx, proxying `/api` so the browser stays same-origin.
+Migrations run as a one-shot container before the API starts. CI builds both images and fails
+on fixable CRITICAL vulnerabilities (Trivy).

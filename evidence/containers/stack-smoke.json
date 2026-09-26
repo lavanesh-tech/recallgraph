@@ -1,0 +1,24 @@
+{
+  "recorded_at": "2026-09-26T19:32:03Z",
+  "git_commit": "669e786",
+  "environment": "local macOS arm64, Docker Desktop",
+  "command": "docker compose -f compose.stack.yml up -d --build --wait",
+  "measured": {
+    "cold_build_and_start_s": 45,
+    "services_healthy": [
+      "postgres",
+      "api",
+      "web",
+      "mailpit"
+    ],
+    "migrate": "exited 0",
+    "api_user_uid": 10001,
+    "hsts_in_production": true,
+    "api_docs_status_in_production": 404,
+    "image_sizes": {
+      "api": "635MB",
+      "web": "76.4MB"
+    }
+  },
+  "note": "API image size is dominated by fastembed/onnxruntime kept for the reproducible semantic experiment"
+}

@@ -1,0 +1,78 @@
+# Full containerized stack (production-like, local only):
+#   RECALLGRAPH_JWT_SECRET=$(openssl rand -hex 32) docker compose -f compose.stack.yml up -d --build
+# Web UI: http://127.0.0.1:8080   Mail UI: http://127.0.0.1:8027
+# The database is not exposed to the host.
+name: recallgraph-stack
+
+x-api-env: &api-env
+  RECALLGRAPH_ENVIRONMENT: production
+  RECALLGRAPH_DATABASE_URL: postgresql+asyncpg://recallgraph:${RECALLGRAPH_DB_PASSWORD:-recallgraph}@postgres:5432/recallgraph
+  RECALLGRAPH_JWT_SECRET: ${RECALLGRAPH_JWT_SECRET:?set RECALLGRAPH_JWT_SECRET}
+  RECALLGRAPH_SMTP_HOST: mailpit
+  RECALLGRAPH_SMTP_PORT: "1025"
+  RECALLGRAPH_OPENAI_API_KEY: ${RECALLGRAPH_OPENAI_API_KEY:-}
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: recallgraph
+      POSTGRES_PASSWORD: ${RECALLGRAPH_DB_PASSWORD:-recallgraph}
+      POSTGRES_DB: recallgraph
+    volumes: [stackdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recallgraph"]
+      interval: 5s
+      retries: 20
+
+  migrate:
+    build: ./backend
+    image: recallgraph-api:local
+    command: ["alembic", "upgrade", "head"]
+    environment: *api-env
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    image: recallgraph-api:local
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  worker:
+    image: recallgraph-api:local
+    command: ["recallgraph", "worker", "run"]
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck: { disable: true }
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    image: recallgraph-web:local
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      api: { condition: service_healthy }
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports: ["127.0.0.1:8027:8025"]
+
+volumes:
+  stackdata:
