@@ -1,0 +1,180 @@
+{
+  "recorded_at": "2026-09-26T19:59:43Z",
+  "git_commit": "477462e",
+  "command": "uv run python benchmarks/load.py --base-url http://127.0.0.1:8001 --requests 400 --warmup 30 --concurrency 1 8 32 --out ../evidence/benchmarks/api-latency.json",
+  "environment": {
+    "machine": "Darwin arm64",
+    "cpu_count": 15,
+    "python": "3.12.14",
+    "server": "1 uvicorn process, Postgres 17 (Docker), load generator on the same host",
+    "dataset_recalls": 40348
+  },
+  "method": "closed-loop; fixed request list cycled; warmup discarded; errors = HTTP >= 400",
+  "results": {
+    "search_keywords": [
+      {
+        "concurrency": 1,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 64.9,
+        "latency_ms": {
+          "p50": 15.82,
+          "p95": 19.05,
+          "p99": 19.78,
+          "mean": 15.4,
+          "max": 37.67
+        }
+      },
+      {
+        "concurrency": 8,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 295.5,
+        "latency_ms": {
+          "p50": 24.23,
+          "p95": 45.56,
+          "p99": 65.19,
+          "mean": 26.88,
+          "max": 82.4
+        }
+      },
+      {
+        "concurrency": 32,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 348.2,
+        "latency_ms": {
+          "p50": 82.18,
+          "p95": 140.31,
+          "p99": 172.4,
+          "mean": 89.02,
+          "max": 232.99
+        }
+      }
+    ],
+    "search_filtered": [
+      {
+        "concurrency": 1,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 49.4,
+        "latency_ms": {
+          "p50": 15.26,
+          "p95": 44.06,
+          "p99": 46.11,
+          "mean": 20.22,
+          "max": 55.63
+        }
+      },
+      {
+        "concurrency": 8,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 272.4,
+        "latency_ms": {
+          "p50": 21.63,
+          "p95": 62.38,
+          "p99": 86.74,
+          "mean": 28.87,
+          "max": 113.47
+        }
+      },
+      {
+        "concurrency": 32,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 289.0,
+        "latency_ms": {
+          "p50": 96.51,
+          "p95": 175.98,
+          "p99": 198.44,
+          "mean": 105.98,
+          "max": 238.86
+        }
+      }
+    ],
+    "match_description": [
+      {
+        "concurrency": 1,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 25.9,
+        "latency_ms": {
+          "p50": 31.78,
+          "p95": 55.69,
+          "p99": 63.85,
+          "mean": 38.63,
+          "max": 76.98
+        }
+      },
+      {
+        "concurrency": 8,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 49.2,
+        "latency_ms": {
+          "p50": 155.91,
+          "p95": 245.55,
+          "p99": 269.71,
+          "mean": 161.5,
+          "max": 283.4
+        }
+      },
+      {
+        "concurrency": 32,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 50.6,
+        "latency_ms": {
+          "p50": 616.11,
+          "p95": 1048.57,
+          "p99": 1124.11,
+          "mean": 611.99,
+          "max": 1479.36
+        }
+      }
+    ],
+    "recall_detail": [
+      {
+        "concurrency": 1,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 97.9,
+        "latency_ms": {
+          "p50": 10.24,
+          "p95": 12.53,
+          "p99": 13.11,
+          "mean": 10.21,
+          "max": 36.43
+        }
+      },
+      {
+        "concurrency": 8,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 327.9,
+        "latency_ms": {
+          "p50": 18.35,
+          "p95": 59.28,
+          "p99": 88.56,
+          "mean": 24.15,
+          "max": 109.12
+        }
+      },
+      {
+        "concurrency": 32,
+        "requests": 400,
+        "errors": 0,
+        "throughput_rps": 367.1,
+        "latency_ms": {
+          "p50": 84.78,
+          "p95": 125.36,
+          "p99": 148.37,
+          "mean": 84.95,
+          "max": 194.64
+        }
+      }
+    ]
+  },
+  "caveat": "Single-host numbers: client and server share CPUs. Not a production capacity claim."
+}

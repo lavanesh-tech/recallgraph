@@ -30,7 +30,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 24 | End-to-end testing and coverage | done |
 | 25 | Full containerization | done |
 | 26 | Observability | done |
-| 27 | Performance benchmarks | planned |
+| 27 | Performance benchmarks | done |
 | 28 | AWS infrastructure with Terraform | planned |
 | 29 | Continuous deployment | planned |
 | 30 | Architecture documentation | planned |

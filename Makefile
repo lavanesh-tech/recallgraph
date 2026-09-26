@@ -66,3 +66,7 @@ stack-up:
 	docker compose -f compose.stack.yml up -d --build --wait
 stack-down:
 	docker compose -f compose.stack.yml down
+
+.PHONY: bench
+bench:
+	cd backend && uv run python benchmarks/load.py --base-url http://127.0.0.1:8001 --requests 400 --concurrency 1 8 32 --out ../evidence/benchmarks/api-latency.json
