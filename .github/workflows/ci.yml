@@ -168,11 +168,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=web
       - name: API image runs as non-root
         run: test "$(docker run --rm --entrypoint id recallgraph-api:ci -u)" = "10001"
-      - name: Scan images (fixable CRITICAL)
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: image
-          image-ref: recallgraph-api:ci
-          severity: CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
+      - name: Scan API image (fixable CRITICAL)
+        run: >-
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest
+          image --severity CRITICAL --ignore-unfixed --exit-code 1 --no-progress recallgraph-api:ci
