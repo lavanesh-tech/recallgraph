@@ -46,7 +46,9 @@ def test_expired_token_is_rejected() -> None:
 def test_tampered_token_is_rejected() -> None:
     token, _ = create_access_token(uuid.uuid4(), SETTINGS)
     header, payload, signature = token.split(".")
-    tampered = f"{header}.{payload}.{signature[:-2]}AA"
+    mid = len(signature) // 2
+    flipped = "B" if signature[mid] == "A" else "A"
+    tampered = f"{header}.{payload}.{signature[:mid]}{flipped}{signature[mid + 1 :]}"
 
     with pytest.raises(TokenError):
         decode_access_token(tampered, SETTINGS)
