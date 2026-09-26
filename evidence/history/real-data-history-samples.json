@@ -1,0 +1,69 @@
+{
+  "recorded_at": "2026-09-26T16:20:32Z",
+  "git_commit": "c782713",
+  "environment": "local macOS arm64, Postgres 17 (Docker), real CPSC+NHTSA data",
+  "company_search_ford": [
+    {
+      "id": 20098,
+      "name": "Ford Motor Company",
+      "normalized_name": "ford motor",
+      "recall_count": 1750
+    },
+    {
+      "id": 5503,
+      "name": "Fire-Lite Alarms, Inc. of Northford, Conn.",
+      "normalized_name": "fire lite alarms of northford conn",
+      "recall_count": 2
+    },
+    {
+      "id": 9090,
+      "name": "Ford",
+      "normalized_name": "ford",
+      "recall_count": 2
+    }
+  ],
+  "top_company_history": {
+    "name": "Ford Motor Company",
+    "total_recalls": 1750,
+    "first_recall_date": "1966-10-06",
+    "last_recall_date": "2026-09-22",
+    "years": 61,
+    "by_role": [
+      {
+        "role": "manufacturer",
+        "count": 1750
+      }
+    ]
+  },
+  "full_timeline": {
+    "total": 40348,
+    "years": 115,
+    "last_5": [
+      {
+        "year": 2024,
+        "source": "nhtsa",
+        "count": 1073
+      },
+      {
+        "year": 2025,
+        "source": "cpsc",
+        "count": 420
+      },
+      {
+        "year": 2025,
+        "source": "nhtsa",
+        "count": 995
+      },
+      {
+        "year": 2026,
+        "source": "cpsc",
+        "count": 459
+      },
+      {
+        "year": 2026,
+        "source": "nhtsa",
+        "count": 664
+      }
+    ]
+  }
+}
