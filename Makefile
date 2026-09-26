@@ -1,7 +1,8 @@
 BACKEND := backend
 API_PORT ?= 8001
+FROM_YEAR ?= 1970
 
-.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run
+.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run ingest-cpsc stats
 
 install:
 	cd $(BACKEND) && uv sync
@@ -26,3 +27,7 @@ run:
 	cd $(BACKEND) && uv run uvicorn recallgraph.main:create_app --factory --host 127.0.0.1 --port $(API_PORT) --reload --no-access-log
 migrate-check:
 	cd $(BACKEND) && uv run alembic check
+ingest-cpsc:
+	cd $(BACKEND) && uv run recallgraph ingest cpsc --from-year $(FROM_YEAR)
+stats:
+	cd $(BACKEND) && uv run recallgraph stats

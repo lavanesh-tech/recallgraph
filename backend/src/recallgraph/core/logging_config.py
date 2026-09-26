@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from typing import TextIO
 
 import structlog
 from structlog.types import Processor
@@ -9,7 +10,8 @@ from structlog.types import Processor
 from recallgraph.core.config import LogLevel
 
 
-def configure_logging(level: LogLevel, json_output: bool) -> None:
+def configure_logging(level: LogLevel, json_output: bool, *, stream: TextIO | None = None) -> None:
+    """Configure structlog. CLIs pass stream=sys.stderr so stdout stays machine-readable."""
     renderer: Processor = (
         structlog.processors.JSONRenderer() if json_output else structlog.dev.ConsoleRenderer()
     )
@@ -23,6 +25,6 @@ def configure_logging(level: LogLevel, json_output: bool) -> None:
             renderer,
         ],
         wrapper_class=structlog.make_filtering_bound_logger(logging.getLevelNamesMapping()[level]),
-        logger_factory=structlog.PrintLoggerFactory(file=sys.stdout),
+        logger_factory=structlog.PrintLoggerFactory(file=stream or sys.stdout),
         cache_logger_on_first_use=False,
     )

@@ -37,3 +37,19 @@ async def db_session(migrated_database: str) -> AsyncIterator[AsyncSession]:
             yield session
     finally:
         await engine.dispose()
+
+
+@pytest.fixture
+async def session_factory(
+    migrated_database: str,
+) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
+    """A session factory on a freshly emptied schema (for code that manages its own sessions)."""
+    engine = create_async_engine(migrated_database)
+    async with engine.begin() as connection:
+        await connection.execute(
+            text("TRUNCATE raw_records, ingestion_runs, sources RESTART IDENTITY CASCADE")
+        )
+    try:
+        yield async_sessionmaker(engine, expire_on_commit=False)
+    finally:
+        await engine.dispose()
