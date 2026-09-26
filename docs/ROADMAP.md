@@ -8,8 +8,8 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 2 | Repository skeleton | done |
 | 3 | Backend foundation | done |
 | 4 | CI and project documentation baseline | done |
-| 5 | Database platform | in progress |
-| 6 | Provenance data model | planned |
+| 5 | Database platform | done |
+| 6 | Provenance data model | in progress |
 | 7 | CPSC ingestion pipeline | planned |
 | 8 | Recall domain and normalization | planned |
 | 9 | Second authoritative source | planned |

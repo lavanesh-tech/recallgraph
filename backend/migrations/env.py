@@ -7,6 +7,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+import recallgraph.db.registry  # noqa: F401  (registers all models)
 from recallgraph.core.config import get_settings
 from recallgraph.db.base import Base
 

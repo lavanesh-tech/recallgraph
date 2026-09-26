@@ -60,5 +60,8 @@ jobs:
       - name: Alembic upgrade head
         run: uv run alembic upgrade head
 
+      - name: Alembic check (models match migrations)
+        run: uv run alembic check
+
       - name: Pytest (unit + integration)
         run: uv run pytest

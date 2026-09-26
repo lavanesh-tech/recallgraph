@@ -3,7 +3,7 @@
 **Search authoritative U.S. government safety data to find out whether a product you own, or
 are considering buying, has an official recall or documented safety issue.**
 
-> Status: early development (Step 4 of 32). Only the items under **Implemented** exist today.
+> Status: early development (Step 6 of 32). Only the items under **Implemented** exist today.
 
 ## Core principles
 
@@ -24,11 +24,15 @@ are considering buying, has an official recall or documented safety issue.**
   internal errors or echo rejected input
 - Tests with pytest + HTTPX; ruff linting/formatting; mypy in strict mode
 - GitHub Actions CI running lint, type checks and tests from the locked dependency set
+- PostgreSQL 17 (Docker Compose), async SQLAlchemy 2.x, Alembic migrations, `GET /api/v1/ready`
+  readiness probe (503 problem details when the database is unreachable)
+- Provenance data model: sources, ingestion runs and versioned raw records with SHA-256 content
+  hashes and idempotent storage (tested against real PostgreSQL)
 
 ## Planned
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md). Highlights, **none of which are implemented yet**:
-PostgreSQL data platform, CPSC and NHTSA ingestion with provenance, normalized recall model,
+CPSC and NHTSA ingestion, normalized recall model,
 search, explainable matching with a labeled evaluation set, authentication, saved inventory,
 Recall Radar notifications, evidence-grounded AI explanations, Next.js frontend, security
 hardening, observability, benchmarks, and AWS deployment.

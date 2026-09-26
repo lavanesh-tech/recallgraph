@@ -1,7 +1,7 @@
 BACKEND := backend
 API_PORT ?= 8001
 
-.PHONY: install db-up db-down migrate lint format typecheck test test-unit check run
+.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run
 
 install:
 	cd $(BACKEND) && uv sync
@@ -24,3 +24,5 @@ test-unit:
 check: lint typecheck test
 run:
 	cd $(BACKEND) && uv run uvicorn recallgraph.main:create_app --factory --host 127.0.0.1 --port $(API_PORT) --reload --no-access-log
+migrate-check:
+	cd $(BACKEND) && uv run alembic check
