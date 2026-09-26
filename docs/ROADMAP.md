@@ -1,0 +1,38 @@
+# RecallGraph Roadmap (32 steps)
+
+Status values: `done` (verified by real command output), `in progress`, `planned`.
+
+| # | Step | Status |
+|---|------|--------|
+| 1 | Toolchain prerequisites | done |
+| 2 | Repository skeleton | done |
+| 3 | Backend foundation | done |
+| 4 | CI and project documentation baseline | in progress |
+| 5 | Database platform | planned |
+| 6 | Provenance data model | planned |
+| 7 | CPSC ingestion pipeline | planned |
+| 8 | Recall domain and normalization | planned |
+| 9 | Second authoritative source | planned |
+| 10 | Search API v1 | planned |
+| 11 | Safety history | planned |
+| 12 | Explainable matching engine | planned |
+| 13 | Labeled evaluation set and harness | planned |
+| 14 | Matching tuning | planned |
+| 15 | Authentication and authorization | planned |
+| 16 | Saved inventory | planned |
+| 17 | Recall Radar core | planned |
+| 18 | Event-driven Radar (justification check first) | planned |
+| 19 | Semantic retrieval experiment | planned |
+| 20 | Grounded AI explanations | planned |
+| 21 | Frontend foundation | planned |
+| 22 | Frontend product features | planned |
+| 23 | Security hardening | planned |
+| 24 | End-to-end testing and coverage | planned |
+| 25 | Full containerization | planned |
+| 26 | Observability | planned |
+| 27 | Performance benchmarks | planned |
+| 28 | AWS infrastructure with Terraform | planned |
+| 29 | Continuous deployment | planned |
+| 30 | Architecture documentation | planned |
+| 31 | Recruiter-quality README and interview guide | planned |
+| 32 | Evidence audit and résumé bullets | planned |
