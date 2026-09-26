@@ -1,0 +1,14 @@
+{
+  "recorded_at": "2026-09-26T18:29:06Z",
+  "git_commit": "f8b7fd2",
+  "question": "Is Kafka justified for Recall Radar?",
+  "measured": {
+    "official_recall_rate": {
+      "recalls_dated_last_365_days": 1533,
+      "per_day": 4.20
+    },
+    "scheduled_cycle_duration_s": 19.311,
+    "consumers": 1
+  },
+  "decision": "No Kafka: transactional outbox + SKIP LOCKED worker (docs/DECISIONS.md D-014)"
+}

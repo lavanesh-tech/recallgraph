@@ -1,0 +1,43 @@
+{
+  "recorded_at": "2026-09-26T18:29:06Z",
+  "git_commit": "f8b7fd2",
+  "note": "DEMO account on real CPSC data; model XR-8801 taken from real recall records",
+  "radar_run": {
+    "run_id": "b483b38d-8b49-416d-affc-5103500c54e5",
+    "status": "succeeded",
+    "recalls_scanned": 30321,
+    "items_scanned": 1,
+    "alerts_created": 2,
+    "duration_s": 1.753
+  },
+  "worker": {
+    "batches": 2,
+    "claimed": 2,
+    "sent": 2,
+    "duplicates": 0,
+    "skipped": 0,
+    "retried": 0,
+    "dead": 0
+  },
+  "alerts_api": {
+    "total": 2,
+    "unread": 2,
+    "alerts": [
+      {
+        "tier": "identifier_match",
+        "recall": "Junkins Recalls DHASUWT Hair Dryer Brushes Due to Risk of Serious Injury or Death from Electrocution, and Shock Hazards; Violate Federal Regulations; Smoking and Fire Hazards"
+      },
+      {
+        "tier": "identifier_match",
+        "recall": "Guang Zhou Recalls Wantefully Hair Dryer Brushes Due to Risk of Serious Injury or Death from Electrocution, Shock and Burn Hazards; Violate Federal Regulations"
+      }
+    ]
+  },
+  "mailpit": {
+    "mailpit_total": 2,
+    "subjects": [
+      "RecallGraph Radar: possible recall for your DEMO hair dryer brush",
+      "RecallGraph Radar: possible recall for your DEMO hair dryer brush"
+    ]
+  }
+}

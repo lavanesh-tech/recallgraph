@@ -21,7 +21,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 15 | Authentication and authorization | done |
 | 16 | Saved inventory | done |
 | 17 | Recall Radar core | done |
-| 18 | Event-driven Radar (justification check first) | in progress |
+| 18 | Event-driven Radar (justification check first) | done |
 | 19 | Semantic retrieval experiment | planned |
 | 20 | Grounded AI explanations | planned |
 | 21 | Frontend foundation | planned |
