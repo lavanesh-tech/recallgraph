@@ -89,3 +89,8 @@ not planned.
   id and client IP; never passwords, tokens or submitted emails.
 - **Known trade-off:** registration reports "email already registered" (409), which allows
   account enumeration; login is rate-limited in Step 23.
+
+## D-012 Inventory isolation
+Every inventory query filters by the authenticated user's id in SQL (never by client input).
+Another user's item returns 404, not 403, so item ids cannot be probed. Request models use
+`extra="forbid"` to block mass assignment (e.g. `user_id`). 200 items per user (soft limit).

@@ -8,24 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from recallgraph.db.session import get_session
 from recallgraph.matching.engine import ENGINE_VERSION, MatchQuery
 from recallgraph.matching.schemas import MatchOut, MatchRequest, MatchResponse, SignalOut
-from recallgraph.matching.service import match_product
+from recallgraph.matching.service import MatchOutcome, match_product
 from recallgraph.search.schemas import CompanyRef, RecallSummary
 
 router = APIRouter(tags=["matching"])
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 
-@router.post("/match", response_model=MatchResponse)
-async def match(body: MatchRequest, session: SessionDep) -> MatchResponse:
-    query = MatchQuery(
-        description=body.description,
-        manufacturer=body.manufacturer,
-        model=body.model,
-        upc=body.upc,
-        category=body.category,
-        purchase_year=body.purchase_year,
-    )
-    outcome = await match_product(session, query, body.limit)
+def build_match_response(outcome: MatchOutcome) -> MatchResponse:
     return MatchResponse(
         engine_version=ENGINE_VERSION,
         candidates_considered=outcome.candidates_considered,
@@ -62,3 +52,16 @@ async def match(body: MatchRequest, session: SessionDep) -> MatchResponse:
             for r in outcome.results
         ],
     )
+
+
+@router.post("/match", response_model=MatchResponse)
+async def match(body: MatchRequest, session: SessionDep) -> MatchResponse:
+    query = MatchQuery(
+        description=body.description,
+        manufacturer=body.manufacturer,
+        model=body.model,
+        upc=body.upc,
+        category=body.category,
+        purchase_year=body.purchase_year,
+    )
+    return build_match_response(await match_product(session, query, body.limit))

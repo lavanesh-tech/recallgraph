@@ -19,7 +19,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 13 | Labeled evaluation set and harness | done |
 | 14 | Matching tuning | done |
 | 15 | Authentication and authorization | done |
-| 16 | Saved inventory | planned |
+| 16 | Saved inventory | done |
 | 17 | Recall Radar core | planned |
 | 18 | Event-driven Radar (justification check first) | planned |
 | 19 | Semantic retrieval experiment | planned |
