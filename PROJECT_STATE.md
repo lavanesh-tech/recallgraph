@@ -4,7 +4,7 @@ Handoff document for continuing work in a new conversation. Keep it current afte
 
 ## Snapshot
 - **Repo:** `~/Desktop/recallgraph` → https://github.com/lavanesh-tech/recallgraph (public)
-- **Current step:** 8 of 32 — Recall domain and normalization (in progress)
+- **Current step:** 9 of 32 — Second authoritative source: NHTSA (in progress)
 - **Next step:** 7 — CPSC ingestion pipeline (resilient HTTP client, idempotent raw storage via
   `RawRecordRepository`, CLI command, synthetic tests, one real ingestion run → `evidence/`)
 - **Git identity:** LAVANESH <lavanesh532@gmail.com>. User runs all git commands. No AI co-authors.
@@ -54,6 +54,7 @@ in-batch dedupe, run lifecycle, DB check constraint).
   CI run 36251076934 green (Postgres service, migrations, tests). Commit 858c552.
 - Step 6 (2026-09-26): 29 passed; `alembic check` clean; CI run 36251537766 green. Commit 422eb0c.
 - Step 7 (2026-09-26): 43 passed; CI run 36252101604 green; real CPSC ingestion 10,027 records in 57 year windows (55.4 s); idempotent re-run inserted 0 of 879. Evidence: evidence/ingestion/. Commits c447760, 5381a37.
+- Step 8 (2026-09-26): 65 passed; CI green; 10,027 CPSC recalls normalized (0 rejected, 5.5 s); idempotent re-run 10,027 unchanged. Evidence: evidence/ingestion/cpsc-normalization.json. Commits dfa11bd, bb7a34b.
 
 ## Key decisions
 `docs/DECISIONS.md` D-001 … D-007.

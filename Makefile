@@ -2,7 +2,7 @@ BACKEND := backend
 API_PORT ?= 8001
 FROM_YEAR ?= 1970
 
-.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run ingest-cpsc stats normalize-cpsc
+.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run ingest-cpsc stats normalize-cpsc ingest-nhtsa normalize-nhtsa
 
 install:
 	cd $(BACKEND) && uv sync
@@ -33,3 +33,7 @@ stats:
 	cd $(BACKEND) && uv run recallgraph stats
 normalize-cpsc:
 	cd $(BACKEND) && uv run recallgraph normalize cpsc
+ingest-nhtsa:
+	cd $(BACKEND) && uv run recallgraph ingest nhtsa
+normalize-nhtsa:
+	cd $(BACKEND) && uv run recallgraph normalize nhtsa

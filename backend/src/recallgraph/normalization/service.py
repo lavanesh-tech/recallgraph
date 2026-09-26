@@ -1,8 +1,9 @@
 """Normalizes the latest raw version of every source record into the recall domain tables."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Any
 
 import structlog
 from sqlalchemy import select
@@ -10,7 +11,10 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import selectinload
 
-from recallgraph.normalization.cpsc import NORMALIZER_VERSION, normalize_cpsc
+from recallgraph.normalization.cpsc import NORMALIZER_VERSION as CPSC_NORMALIZER_VERSION
+from recallgraph.normalization.cpsc import normalize_cpsc
+from recallgraph.normalization.nhtsa import NORMALIZER_VERSION as NHTSA_NORMALIZER_VERSION
+from recallgraph.normalization.nhtsa import normalize_nhtsa
 from recallgraph.normalization.types import NormalizedCompany, NormalizedRecall
 from recallgraph.provenance.models import RawRecord, Source
 from recallgraph.recalls.models import (
@@ -24,6 +28,12 @@ from recallgraph.recalls.models import (
 )
 
 logger = structlog.get_logger(__name__)
+
+Normalizer = Callable[[dict[str, Any]], NormalizedRecall]
+NORMALIZERS: dict[str, tuple[Normalizer, str]] = {
+    "cpsc": (normalize_cpsc, CPSC_NORMALIZER_VERSION),
+    "nhtsa": (normalize_nhtsa, NHTSA_NORMALIZER_VERSION),
+}
 
 _WITH_CHILDREN = (
     selectinload(Recall.products),
@@ -61,10 +71,14 @@ async def _ensure_companies(
 
 
 def _apply(
-    recall: Recall, raw: RawRecord, n: NormalizedRecall, company_ids: dict[str, int]
+    recall: Recall,
+    raw: RawRecord,
+    n: NormalizedRecall,
+    company_ids: dict[str, int],
+    normalizer_version: str,
 ) -> None:
     recall.raw_record_id = raw.id
-    recall.normalizer_version = NORMALIZER_VERSION
+    recall.normalizer_version = normalizer_version
     recall.recall_number = n.recall_number
     recall.title = n.title
     recall.description = n.description
@@ -105,15 +119,32 @@ def _apply(
 async def normalize_cpsc_records(
     session_factory: async_sessionmaker[AsyncSession], *, force: bool = False, batch_size: int = 500
 ) -> NormalizationCounts:
+    return await normalize_source_records(
+        session_factory, "cpsc", force=force, batch_size=batch_size
+    )
+
+
+async def normalize_source_records(
+    session_factory: async_sessionmaker[AsyncSession],
+    source_code: str,
+    *,
+    force: bool = False,
+    batch_size: int = 500,
+) -> NormalizationCounts:
     """Idempotent: a recall already built from the same raw version by the same normalizer
     version is left untouched unless force=True."""
+    if source_code not in NORMALIZERS:
+        raise ValueError(f"no normalizer for source {source_code!r}")
+    normalize, normalizer_version = NORMALIZERS[source_code]
     counts = NormalizationCounts()
     async with session_factory() as session:
         source = (
-            await session.execute(select(Source).where(Source.code == "cpsc"))
+            await session.execute(select(Source).where(Source.code == source_code))
         ).scalar_one_or_none()
         if source is None:
-            raise LookupError("no 'cpsc' source found; run `recallgraph ingest cpsc` first")
+            raise LookupError(
+                f"no {source_code!r} source found; run `recallgraph ingest {source_code}` first"
+            )
         source_id = source.id
         latest_ids = (
             (
@@ -166,12 +197,12 @@ async def normalize_cpsc_records(
                     current is not None
                     and not force
                     and current.raw_record_id == raw.id
-                    and current.normalizer_version == NORMALIZER_VERSION
+                    and current.normalizer_version == normalizer_version
                 ):
                     counts.unchanged += 1
                     continue
                 try:
-                    pending.append((raw, normalize_cpsc(raw.payload)))
+                    pending.append((raw, normalize(raw.payload)))
                 except ValueError as exc:
                     counts.rejected += 1
                     logger.warning(
@@ -191,7 +222,7 @@ async def normalize_cpsc_records(
                     counts.created += 1
                 else:
                     counts.updated += 1
-                _apply(recall, raw, normalized, company_ids)
+                _apply(recall, raw, normalized, company_ids, normalizer_version)
             await session.commit()
             session.expunge_all()
             logger.info("normalization_batch_done", processed=counts.seen)

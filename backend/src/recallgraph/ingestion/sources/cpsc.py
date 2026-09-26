@@ -1,12 +1,14 @@
 """CPSC adapter: U.S. Consumer Product Safety Commission recalls (SaferProducts.gov REST API)."""
 
 import asyncio
+from collections.abc import AsyncIterator, Sequence
 from dataclasses import dataclass
 from datetime import date
 from typing import Any
 
 import httpx
 
+from recallgraph.ingestion.base import Batch
 from recallgraph.ingestion.http import FetchError, Sleep, get_json
 from recallgraph.provenance.repository import RawRecordInput, SourceSpec
 
@@ -77,3 +79,37 @@ class CpscRecallClient:
             raise FetchError("unexpected CPSC response shape (expected a JSON array of objects)")
         records: list[dict[str, Any]] = data
         return records
+
+
+class CpscAdapter:
+    """SourceAdapter over calendar-year windows of the CPSC Recall API."""
+
+    def __init__(
+        self,
+        client: CpscRecallClient,
+        windows: Sequence[DateWindow],
+        *,
+        pause_s: float = 0.5,
+        sleep: Sleep = asyncio.sleep,
+    ) -> None:
+        self.spec = CPSC_SOURCE
+        self._client = client
+        self._windows = list(windows)
+        self._pause_s = pause_s
+        self._sleep = sleep
+
+    def parameters(self) -> dict[str, Any]:
+        return {
+            "api": CPSC_RECALL_API_URL,
+            "windows": [[w.start.isoformat(), w.end.isoformat()] for w in self._windows],
+        }
+
+    async def batches(self) -> AsyncIterator[Batch]:
+        for index, window in enumerate(self._windows):
+            if index:
+                await self._sleep(self._pause_s)  # be polite to the public API
+            records = await self._client.fetch_window(window)
+            yield Batch(
+                label=window.start.isoformat(),
+                records=[to_raw_input(r, fallback_url=window.query_url()) for r in records],
+            )

@@ -1,7 +1,8 @@
 """Command-line interface.
 
   recallgraph ingest cpsc --from-year 1970 [--to-year 2026]
-  recallgraph normalize cpsc [--force]
+  recallgraph ingest nhtsa [--page-size 5000] [--max-pages N]
+  recallgraph normalize {cpsc,nhtsa} [--force]
   recallgraph stats
 
 Results are printed to stdout as JSON; logs go to stderr.
@@ -24,10 +25,10 @@ from recallgraph.core.config import Settings, get_settings
 from recallgraph.core.logging_config import configure_logging
 from recallgraph.db.base import Base
 from recallgraph.db.session import create_engine, create_session_factory
-from recallgraph.ingestion.runner import ingest_cpsc
+from recallgraph.ingestion.runner import IngestionSummary, ingest_cpsc, run_ingestion
 from recallgraph.ingestion.sources.cpsc import CpscRecallClient, year_windows
-from recallgraph.normalization.cpsc import NORMALIZER_VERSION
-from recallgraph.normalization.service import normalize_cpsc_records
+from recallgraph.ingestion.sources.nhtsa import NhtsaAdapter, NhtsaRecallClient
+from recallgraph.normalization.service import NORMALIZERS, normalize_source_records
 from recallgraph.provenance.models import IngestionRun, RawRecord, Source
 from recallgraph.recalls.models import (
     Company,
@@ -54,23 +55,13 @@ def _http_client() -> httpx.AsyncClient:
     )
 
 
-async def _ingest_cpsc(settings: Settings, from_year: int, to_year: int) -> dict[str, Any]:
-    engine = create_engine(settings)
-    try:
-        async with _http_client() as http:
-            summary = await ingest_cpsc(
-                create_session_factory(engine),
-                CpscRecallClient(http),
-                year_windows(from_year, to_year),
-            )
-    finally:
-        await engine.dispose()
+def _summary_json(summary: IngestionSummary) -> dict[str, Any]:
     seen = summary.counts.seen
     return {
         "run_id": str(summary.run_id),
         "source": summary.source,
         "status": summary.status,
-        "year_windows": summary.windows,
+        "batches": summary.windows,
         "records_seen": seen,
         "records_inserted": summary.counts.inserted,
         "records_unchanged": summary.counts.unchanged,
@@ -79,17 +70,36 @@ async def _ingest_cpsc(settings: Settings, from_year: int, to_year: int) -> dict
     }
 
 
-async def _normalize_cpsc(settings: Settings, force: bool) -> dict[str, Any]:
+async def _ingest(settings: Settings, args: argparse.Namespace) -> dict[str, Any]:
+    engine = create_engine(settings)
+    try:
+        async with _http_client() as http:
+            factory = create_session_factory(engine)
+            if args.source == "cpsc":
+                summary = await ingest_cpsc(
+                    factory, CpscRecallClient(http), year_windows(args.from_year, args.to_year)
+                )
+            else:
+                adapter = NhtsaAdapter(
+                    NhtsaRecallClient(http), page_size=args.page_size, max_pages=args.max_pages
+                )
+                summary = await run_ingestion(factory, adapter)
+    finally:
+        await engine.dispose()
+    return _summary_json(summary)
+
+
+async def _normalize(settings: Settings, source: str, force: bool) -> dict[str, Any]:
     engine = create_engine(settings)
     started = time.perf_counter()
     try:
-        counts = await normalize_cpsc_records(create_session_factory(engine), force=force)
+        counts = await normalize_source_records(create_session_factory(engine), source, force=force)
     finally:
         await engine.dispose()
     duration = round(time.perf_counter() - started, 3)
     return {
-        "source": "cpsc",
-        "normalizer_version": NORMALIZER_VERSION,
+        "source": source,
+        "normalizer_version": NORMALIZERS[source][1],
         "force": force,
         **asdict(counts),
         "duration_s": duration,
@@ -155,11 +165,13 @@ def main(argv: list[str] | None = None) -> int:
     cpsc = ingest_sources.add_parser("cpsc", help="CPSC recalls (SaferProducts.gov)")
     cpsc.add_argument("--from-year", type=int, required=True)
     cpsc.add_argument("--to-year", type=int, default=datetime.now(UTC).year)
+    nhtsa = ingest_sources.add_parser("nhtsa", help="NHTSA recalls (data.transportation.gov)")
+    nhtsa.add_argument("--page-size", type=int, default=5000)
+    nhtsa.add_argument("--max-pages", type=int, default=None)
 
     normalize = commands.add_parser("normalize", help="normalize ingested raw records")
-    normalize_sources = normalize.add_subparsers(dest="source", required=True)
-    normalize_cpsc = normalize_sources.add_parser("cpsc")
-    normalize_cpsc.add_argument("--force", action="store_true", help="re-normalize everything")
+    normalize.add_argument("source", choices=sorted(NORMALIZERS))
+    normalize.add_argument("--force", action="store_true", help="re-normalize everything")
 
     commands.add_parser("stats", help="print dataset and ingestion-run counts")
     args = parser.parse_args(argv)
@@ -167,9 +179,9 @@ def main(argv: list[str] | None = None) -> int:
     settings = get_settings()
     configure_logging(settings.log_level, settings.log_json, stream=sys.stderr)
     if args.command == "ingest":
-        result = asyncio.run(_ingest_cpsc(settings, args.from_year, args.to_year))
+        result = asyncio.run(_ingest(settings, args))
     elif args.command == "normalize":
-        result = asyncio.run(_normalize_cpsc(settings, args.force))
+        result = asyncio.run(_normalize(settings, args.source, args.force))
     else:
         result = asyncio.run(_stats(settings))
     sys.stdout.write(json.dumps(result, indent=2) + "\n")
