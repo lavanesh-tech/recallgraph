@@ -16,6 +16,7 @@ import time
 from dataclasses import asdict
 from datetime import UTC, datetime
 from importlib.metadata import version
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -25,6 +26,8 @@ from recallgraph.core.config import Settings, get_settings
 from recallgraph.core.logging_config import configure_logging
 from recallgraph.db.base import Base
 from recallgraph.db.session import create_engine, create_session_factory
+from recallgraph.evaluation.dataset import DATASET_FORMAT, build_dataset, write_dataset
+from recallgraph.evaluation.runner import run_evaluation
 from recallgraph.ingestion.runner import IngestionSummary, ingest_cpsc, run_ingestion
 from recallgraph.ingestion.sources.cpsc import CpscRecallClient, year_windows
 from recallgraph.ingestion.sources.nhtsa import NhtsaAdapter, NhtsaRecallClient
@@ -156,6 +159,44 @@ async def _stats(settings: Settings) -> dict[str, Any]:
     }
 
 
+async def _eval_build(settings: Settings, args: argparse.Namespace) -> dict[str, Any]:
+    engine = create_engine(settings)
+    try:
+        async with create_session_factory(engine)() as session:
+            cases = await build_dataset(
+                session,
+                seed=args.seed,
+                identifiers=args.identifiers,
+                products=args.products,
+                negatives=args.negatives,
+            )
+    finally:
+        await engine.dispose()
+    out = Path(args.out)
+    write_dataset(out, cases)
+    kinds: dict[str, int] = {}
+    for case in cases:
+        kinds[case.kind] = kinds.get(case.kind, 0) + 1
+    return {
+        "format": DATASET_FORMAT,
+        "path": str(out),
+        "seed": args.seed,
+        "cases": len(cases),
+        "by_kind": kinds,
+    }
+
+
+async def _eval_run(settings: Settings, args: argparse.Namespace) -> dict[str, Any]:
+    engine = create_engine(settings)
+    try:
+        report = await run_evaluation(
+            create_session_factory(engine), Path(args.dataset), limit=args.limit
+        )
+    finally:
+        await engine.dispose()
+    return report
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="recallgraph")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -174,6 +215,18 @@ def main(argv: list[str] | None = None) -> int:
     normalize.add_argument("--force", action="store_true", help="re-normalize everything")
 
     commands.add_parser("stats", help="print dataset and ingestion-run counts")
+
+    evaluation = commands.add_parser("eval", help="matching evaluation")
+    eval_commands = evaluation.add_subparsers(dest="eval_command", required=True)
+    build = eval_commands.add_parser("build", help="build a labeled evaluation set")
+    build.add_argument("--out", required=True)
+    build.add_argument("--seed", type=int, default=13)
+    build.add_argument("--identifiers", type=int, default=150)
+    build.add_argument("--products", type=int, default=150)
+    build.add_argument("--negatives", type=int, default=100)
+    run = eval_commands.add_parser("run", help="evaluate the matching engine")
+    run.add_argument("--dataset", required=True)
+    run.add_argument("--limit", type=int, default=20)
     args = parser.parse_args(argv)
 
     settings = get_settings()
@@ -182,6 +235,10 @@ def main(argv: list[str] | None = None) -> int:
         result = asyncio.run(_ingest(settings, args))
     elif args.command == "normalize":
         result = asyncio.run(_normalize(settings, args.source, args.force))
+    elif args.command == "eval" and args.eval_command == "build":
+        result = asyncio.run(_eval_build(settings, args))
+    elif args.command == "eval":
+        result = asyncio.run(_eval_run(settings, args))
     else:
         result = asyncio.run(_stats(settings))
     sys.stdout.write(json.dumps(result, indent=2) + "\n")
