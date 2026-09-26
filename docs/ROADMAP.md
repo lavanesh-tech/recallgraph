@@ -23,7 +23,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 17 | Recall Radar core | done |
 | 18 | Event-driven Radar (justification check first) | done |
 | 19 | Semantic retrieval experiment | done (rejected by pre-registered rule) |
-| 20 | Grounded AI explanations | in progress |
+| 20 | Grounded AI explanations | done |
 | 21 | Frontend foundation (React + JavaScript + HTML/CSS via Vite, no Next.js) | planned |
 | 22 | Frontend product features (React) | planned |
 | 23 | Security hardening | planned |
