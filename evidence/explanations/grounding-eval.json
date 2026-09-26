@@ -1,0 +1,16 @@
+{
+  "recorded_at": "2026-09-26T20:14:57Z",
+  "git_commit": "45bedb3",
+  "command": "recallgraph explain eval --sample 20",
+  "result": {
+    "model": "gpt-4o-mini",
+    "sample": 20,
+    "seed": 20,
+    "grounded_pass_rate": 1.0,
+    "fallback_reasons": {},
+    "offtopic_refusal_rate": 1.0,
+    "mean_points": 5.55,
+    "duration_s": 64.49,
+    "note": "grounded = every point cites valid evidence ids and no safety claims (guard)"
+  }
+}

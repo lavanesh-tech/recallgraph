@@ -22,7 +22,11 @@ def test_database_url() -> str:
 @pytest.fixture
 def settings(test_database_url: str) -> Settings:
     return Settings(
-        environment="test", log_level="WARNING", log_json=True, database_url=test_database_url
+        environment="test",
+        openai_api_key=None,
+        log_level="WARNING",
+        log_json=True,
+        database_url=test_database_url,
     )
 
 

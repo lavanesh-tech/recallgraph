@@ -159,3 +159,6 @@ Prometheus metrics (route-template labels, outbox sampled at scrape), alert rule
 provisioned Grafana dashboard; JSON logs with request ids. `/metrics` lives outside `/api` so the
 public proxy never serves it. No OpenTelemetry tracing: a single API service plus one worker do not
 need it yet (logs already correlate by request id).
+
+Grounding evaluation (real OpenAI, opt-in, gpt-4o-mini, 20 recalls): grounded pass rate 1.0,
+off-topic refusal rate 1.0, no fallbacks (evidence/explanations/grounding-eval.json).
