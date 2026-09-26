@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from recallgraph.api.router import api_v1_router
 from recallgraph.core.config import Settings, get_settings
 from recallgraph.core.logging_config import configure_logging
+from recallgraph.core.metrics import MetricsMiddleware, register_metrics
 from recallgraph.core.problems import register_exception_handlers
 from recallgraph.core.request_context import RequestContextMiddleware
 from recallgraph.core.security_middleware import (
@@ -42,6 +43,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.engine = create_engine(settings)
     app.state.session_factory = create_session_factory(app.state.engine)
+    app.add_middleware(MetricsMiddleware)
     app.add_middleware(AuthRateLimitMiddleware)
     app.add_middleware(BodySizeLimitMiddleware)
     if settings.cors_origins:
@@ -57,4 +59,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(RequestContextMiddleware)
     register_exception_handlers(app)
     app.include_router(api_v1_router)
+    register_metrics(app)
     return app

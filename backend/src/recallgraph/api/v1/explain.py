@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from recallgraph.auth.dependencies import CurrentUser
 from recallgraph.core.config import Settings
+from recallgraph.core.metrics import EXPLANATIONS
 from recallgraph.db.session import get_session
 from recallgraph.explain.llm import LLMClient, OpenAIClient
 from recallgraph.explain.schemas import EvidenceOut, ExplainRequest, ExplanationOut, PointOut
@@ -41,6 +42,7 @@ async def explanation(
     if detail is None:
         raise HTTPException(status_code=404, detail=f"Recall {recall_id} not found.")
     result = await explain(detail, llm, body.question)
+    EXPLANATIONS.labels(result.mode).inc()
     return ExplanationOut(
         recall_id=recall_id,
         mode=result.mode,

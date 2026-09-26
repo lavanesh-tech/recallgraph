@@ -1,0 +1,31 @@
+groups:
+  - name: recallgraph
+    rules:
+      - alert: ApiDown
+        expr: up{job="recallgraph-api"} == 0
+        for: 2m
+        labels: { severity: page }
+        annotations: { summary: "RecallGraph API is not scrapeable" }
+      - alert: HighServerErrorRate
+        expr: |
+          sum(rate(recallgraph_http_requests_total{status="5xx"}[5m]))
+            / clamp_min(sum(rate(recallgraph_http_requests_total[5m])), 1e-9) > 0.05
+        for: 5m
+        labels: { severity: page }
+        annotations: { summary: "More than 5% of requests fail with 5xx" }
+      - alert: SlowRequests
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(recallgraph_http_request_duration_seconds_bucket[5m]))) > 1
+        for: 10m
+        labels: { severity: ticket }
+        annotations: { summary: "p95 latency above 1s" }
+      - alert: OutboxDeadLetters
+        expr: recallgraph_outbox_events{status="dead"} > 0
+        for: 1m
+        labels: { severity: ticket }
+        annotations: { summary: "Notifications in the dead-letter queue; replay after fixing the cause" }
+      - alert: OutboxBacklog
+        expr: recallgraph_outbox_oldest_pending_age_seconds > 900
+        for: 5m
+        labels: { severity: ticket }
+        annotations: { summary: "Oldest pending notification older than 15 minutes (worker down?)" }

@@ -153,3 +153,9 @@ non-root uid 10001, read-only root filesystem, all capabilities dropped); the we
 the Vite build on unprivileged nginx, proxying `/api` so the browser stays same-origin.
 Migrations run as a one-shot container before the API starts. CI builds both images and fails
 on fixable CRITICAL vulnerabilities (Trivy).
+
+## D-020 Observability
+Prometheus metrics (route-template labels, outbox sampled at scrape), alert rules and a
+provisioned Grafana dashboard; JSON logs with request ids. `/metrics` lives outside `/api` so the
+public proxy never serves it. No OpenTelemetry tracing: a single API service plus one worker do not
+need it yet (logs already correlate by request id).

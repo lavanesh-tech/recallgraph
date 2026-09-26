@@ -1,0 +1,52 @@
+{
+  "recorded_at": "2026-09-26T19:52:54Z",
+  "git_commit": "3326ada",
+  "environment": "local compose stack",
+  "traffic": "20 search + 20 missing-recall requests via web proxy",
+  "prometheus_request_counts": [
+    {
+      "route": "/api/v1/health",
+      "status": "2xx",
+      "n": 3
+    },
+    {
+      "route": "/api/v1/recalls",
+      "status": "2xx",
+      "n": 20
+    },
+    {
+      "route": "/api/v1/recalls/{recall_id}",
+      "status": "4xx",
+      "n": 20
+    }
+  ],
+  "alert_rules": [
+    {
+      "name": "ApiDown",
+      "health": "ok",
+      "state": "inactive"
+    },
+    {
+      "name": "HighServerErrorRate",
+      "health": "ok",
+      "state": "inactive"
+    },
+    {
+      "name": "SlowRequests",
+      "health": "ok",
+      "state": "inactive"
+    },
+    {
+      "name": "OutboxDeadLetters",
+      "health": "ok",
+      "state": "inactive"
+    },
+    {
+      "name": "OutboxBacklog",
+      "health": "ok",
+      "state": "inactive"
+    }
+  ],
+  "metrics_exposed_publicly": false,
+  "grafana_dashboard": "RecallGraph overview (provisioned)"
+}
