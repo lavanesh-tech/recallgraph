@@ -51,6 +51,7 @@ Modular monolith; FastAPI app factory `recallgraph.main:create_app`.
 | GET | /api/v1/radar/alerts | own alerts (unread_only, pagination, unread count) |
 | POST | /api/v1/radar/alerts/{id}/read | mark one read (others 404) |
 | POST | /api/v1/radar/alerts/read-all | mark all own alerts read |
+| POST | /api/v1/recalls/{id}/explanation | grounded, cited explanation (Bearer); template fallback |
 
 ## Migrations
 - `0001_baseline` — empty chain start

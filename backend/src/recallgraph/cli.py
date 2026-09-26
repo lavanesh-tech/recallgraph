@@ -21,7 +21,9 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from sqlalchemy import distinct, func, select
+from sqlalchemy import distinct
+from sqlalchemy import func as func
+from sqlalchemy import select as select
 
 from recallgraph.core.config import Settings, get_settings
 from recallgraph.core.logging_config import configure_logging
@@ -31,6 +33,8 @@ from recallgraph.evaluation.dataset import DATASET_FORMAT, build_dataset, write_
 from recallgraph.evaluation.runner import run_evaluation
 from recallgraph.events.senders import SmtpSender
 from recallgraph.events.worker import dead_letters, process_batch, queue_depth, replay_dead
+from recallgraph.explain.llm import OpenAIClient
+from recallgraph.explain.service import explain
 from recallgraph.ingestion.runner import IngestionSummary, ingest_cpsc, run_ingestion
 from recallgraph.ingestion.sources.cpsc import CpscRecallClient, year_windows
 from recallgraph.ingestion.sources.nhtsa import NhtsaAdapter, NhtsaRecallClient
@@ -47,6 +51,7 @@ from recallgraph.recalls.models import (
     RecallProduct,
     RecallRemedy,
 )
+from recallgraph.search.service import get_recall_detail
 from recallgraph.semantic.embedder import FastEmbedder
 from recallgraph.semantic.index import build_embeddings
 
@@ -297,6 +302,60 @@ async def _worker(settings: Settings, args: argparse.Namespace) -> dict[str, Any
         await engine.dispose()
 
 
+async def _explain_eval(settings: Settings, sample: int, seed: int) -> dict[str, Any]:
+    """Opt-in: calls the real OpenAI API for `sample` recalls (costs money)."""
+    if settings.openai_api_key is None:
+        raise SystemExit("RECALLGRAPH_OPENAI_API_KEY is not set; nothing was called.")
+    llm = OpenAIClient(
+        settings.openai_api_key.get_secret_value(), settings.openai_model, settings.openai_timeout_s
+    )
+    engine = create_engine(settings)
+    counts = {"llm": 0, "template_fallback": 0, "insufficient_on_offtopic": 0, "points": 0}
+    reasons: dict[str, int] = {}
+    started = time.perf_counter()
+    try:
+        async with create_session_factory(engine)() as session:
+            ids = (
+                (
+                    await session.execute(
+                        select(Recall.id)
+                        .order_by(func.md5(func.concat(Recall.id, f":{seed}")))
+                        .limit(sample)
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            for recall_id in ids:
+                detail = await get_recall_detail(session, recall_id)
+                if detail is None:
+                    continue
+                grounded = await explain(detail, llm)
+                counts["llm" if grounded.mode == "llm" else "template_fallback"] += 1
+                counts["points"] += len(grounded.points)
+                if grounded.fallback_reason:
+                    key = grounded.fallback_reason.split(":")[-1].strip()
+                    reasons[key] = reasons.get(key, 0) + 1
+                offtopic = await explain(detail, llm, "What will this product cost in 2035?")
+                counts["insufficient_on_offtopic"] += int(
+                    offtopic.mode == "llm" and offtopic.insufficient_evidence
+                )
+    finally:
+        await engine.dispose()
+    n = len(ids)
+    return {
+        "model": settings.openai_model,
+        "sample": n,
+        "seed": seed,
+        "grounded_pass_rate": round(counts["llm"] / n, 4) if n else None,
+        "fallback_reasons": reasons,
+        "offtopic_refusal_rate": round(counts["insufficient_on_offtopic"] / n, 4) if n else None,
+        "mean_points": round(counts["points"] / n, 2) if n else None,
+        "duration_s": round(time.perf_counter() - started, 2),
+        "note": "grounded = every point cites valid evidence ids and no safety claims (guard)",
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="recallgraph")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -337,6 +396,11 @@ def main(argv: list[str] | None = None) -> int:
     semantic_cmd = commands.add_parser("semantic", help="embedding index (experiment)")
     semantic_commands = semantic_cmd.add_subparsers(dest="semantic_command", required=True)
     semantic_commands.add_parser("build", help="embed recall product text into pgvector")
+    explain_cmd = commands.add_parser("explain", help="grounded explanation evaluation")
+    explain_commands = explain_cmd.add_subparsers(dest="explain_command", required=True)
+    explain_eval = explain_commands.add_parser("eval", help="OPT-IN: calls OpenAI")
+    explain_eval.add_argument("--sample", type=int, default=20)
+    explain_eval.add_argument("--seed", type=int, default=20)
 
     radar = commands.add_parser("radar", help="Recall Radar")
     radar_commands = radar.add_subparsers(dest="radar_command", required=True)
@@ -375,6 +439,8 @@ def main(argv: list[str] | None = None) -> int:
         result = asyncio.run(_worker(settings, args))
     elif args.command == "semantic":
         result = asyncio.run(_semantic_build(settings))
+    elif args.command == "explain":
+        result = asyncio.run(_explain_eval(settings, args.sample, args.seed))
     else:
         result = asyncio.run(_stats(settings))
     sys.stdout.write(json.dumps(result, indent=2) + "\n")

@@ -48,6 +48,11 @@ class Settings(BaseSettings):
     smtp_port: int = Field(default=1026, ge=1, le=65535)
     mail_from: str = "RecallGraph Radar <radar@recallgraph.local>"
 
+    # Optional. Without a key, explanations use the deterministic evidence template.
+    openai_api_key: SecretStr | None = None
+    openai_model: str = "gpt-4o-mini"
+    openai_timeout_s: float = Field(default=20.0, gt=0, le=120)
+
     @model_validator(mode="after")
     def _require_real_secret_when_deployed(self) -> Self:
         if self.environment in ("staging", "production"):

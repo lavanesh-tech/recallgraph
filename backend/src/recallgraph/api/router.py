@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from recallgraph.api.v1 import (
     auth,
+    explain,
     health,
     history,
     inventory,
@@ -20,6 +21,7 @@ api_v1_router.include_router(auth.router)
 # Static "/recalls/timeline" must be registered before "/recalls/{recall_id}".
 api_v1_router.include_router(history.timeline_router)
 api_v1_router.include_router(recalls.router)
+api_v1_router.include_router(explain.router)
 api_v1_router.include_router(history.companies_router)
 api_v1_router.include_router(match.router)
 api_v1_router.include_router(inventory.router)

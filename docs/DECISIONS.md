@@ -131,3 +131,13 @@ Evidence: `evidence/experiments/semantic-retrieval-step19.json`.
 A single-page React app (JavaScript, HTML, CSS) built with Vite, talking to the existing
 FastAPI REST API. No Next.js: server-side rendering and its server runtime are not needed
 for a handful of authenticated pages over an existing API.
+
+## D-017 Grounded AI explanations
+- Recall truth is retrieved deterministically; the LLM only rewords a numbered evidence pack
+  (title, dates, products, hazards, remedies, identifiers, contact, source) delimited as data.
+- Strict JSON schema output; a guard requires >= 1 valid evidence citation per point and rejects
+  safety claims ("is safe", "no recalls", "not recalled", "guarantee").
+- Any LLM failure or guard rejection returns a deterministic template from the same evidence,
+  with `mode` and `fallback_reason` in the response. Tests use fakes only (no network/cost);
+  real calls happen only via the opt-in `recallgraph explain eval`.
+- Plain OpenAI SDK, no LangChain: one structured call needs no orchestration framework.
