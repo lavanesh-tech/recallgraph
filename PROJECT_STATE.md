@@ -4,7 +4,7 @@ Handoff document for continuing work in a new conversation. Keep it current afte
 
 ## Snapshot
 - **Repo:** `~/Desktop/recallgraph` → https://github.com/lavanesh-tech/recallgraph (public)
-- **Current step:** 10 of 32 — Search API v1 (next)
+- **Current step:** 11 of 32 — Safety history (next)
 - **Next step:** 7 — CPSC ingestion pipeline (resilient HTTP client, idempotent raw storage via
   `RawRecordRepository`, CLI command, synthetic tests, one real ingestion run → `evidence/`)
 - **Git identity:** LAVANESH <lavanesh532@gmail.com>. User runs all git commands. No AI co-authors.
@@ -33,6 +33,9 @@ Modular monolith; FastAPI app factory `recallgraph.main:create_app`.
 |---|---|---|
 | GET | /api/v1/health | liveness |
 | GET | /api/v1/ready | DB `SELECT 1` with timeout; 200 or 503 problem |
+| GET | /api/v1/recalls | FTS + pg_trgm search; filters source, manufacturer, model, date_from/to; limit<=100, offset<=10000 |
+| GET | /api/v1/recalls/{id} | detail with products, hazards, remedies, identifiers, companies, provenance |
+| GET | /api/v1/recalls/{id}/source-record | exact raw authoritative payload |
 
 ## Migrations
 - `0001_baseline` — empty chain start

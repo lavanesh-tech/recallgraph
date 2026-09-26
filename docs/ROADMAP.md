@@ -13,7 +13,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 7 | CPSC ingestion pipeline | done |
 | 8 | Recall domain and normalization | done |
 | 9 | Second authoritative source | done |
-| 10 | Search API v1 | planned |
+| 10 | Search API v1 | done |
 | 11 | Safety history | planned |
 | 12 | Explainable matching engine | planned |
 | 13 | Labeled evaluation set and harness | planned |

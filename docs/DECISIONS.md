@@ -44,3 +44,13 @@ Kafka, Redis, pgvector, OpenAI/LangChain, Next.js, AWS/Terraform and OpenTelemet
 introduced only at their roadmap step and only when justified (Kafka requires a documented
 justification check; pgvector must improve measured matching quality). Neo4j and Kubernetes are
 not planned.
+
+## D-008 Search on PostgreSQL (FTS + pg_trgm), no search engine
+- **Context:** ~40k normalized recalls; need keyword, typo-tolerant and structured search.
+- **Decision:** A generated, weighted `tsvector` (title A, description B) with a GIN index and
+  `websearch_to_tsquery`, OR a pg_trgm word-similarity match on the title (GIN `gin_trgm_ops`).
+  Structured filters (source, manufacturer, model identifier, date range) are SQL predicates.
+  Offset pagination capped at 10,000. Every response carries a disclaimer that an empty result
+  is not a safety determination.
+- **Consequences:** No extra infrastructure (Elasticsearch/OpenSearch) to run. Revisit only if
+  measured latency or relevance (Step 13 evaluation) shows PostgreSQL is insufficient.
