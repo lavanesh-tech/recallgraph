@@ -41,7 +41,7 @@ async def test_exact_model_returns_identifier_match(catalog: None, client: Async
         "identifier_match",
         1.0,
     )
-    assert body["engine_version"] == "match-1"
+    assert body["engine_version"] == "match-2"
 
 
 async def test_loose_description_is_explained(catalog: None, client: AsyncClient) -> None:

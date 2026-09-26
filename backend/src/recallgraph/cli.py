@@ -190,7 +190,7 @@ async def _eval_run(settings: Settings, args: argparse.Namespace) -> dict[str, A
     engine = create_engine(settings)
     try:
         report = await run_evaluation(
-            create_session_factory(engine), Path(args.dataset), limit=args.limit
+            create_session_factory(engine), Path(args.dataset), limit=args.limit, split=args.split
         )
     finally:
         await engine.dispose()
@@ -227,6 +227,7 @@ def main(argv: list[str] | None = None) -> int:
     run = eval_commands.add_parser("run", help="evaluate the matching engine")
     run.add_argument("--dataset", required=True)
     run.add_argument("--limit", type=int, default=20)
+    run.add_argument("--split", choices=["dev", "test"], default=None)
     args = parser.parse_args(argv)
 
     settings = get_settings()

@@ -65,3 +65,13 @@ not planned.
   AND product evidence >= 0.5); `possible` (score >= 0.35); otherwise not returned.
 - **Why:** no fabricated "AI confidence"; every number is reproducible and testable. Weights and
   thresholds are initial values, to change only with evidence from the labeled evaluation set.
+
+## D-010 Matching tuning match-1 -> match-2 (evidence-driven, held-out split)
+- **Method:** eval-v1 split 50/50 by SHA-256 of case id. Error analysis only on `dev`
+  (`evaluation/analyze_errors.py`); `test` evaluated once before and once after.
+- **Finding:** all true "likely" matches had full product-term coverage; most false positives
+  came from partial coverage via generic words in long NHTSA/CPSC defect text.
+- **Change:** lexical evidence uses title + product names only; `likely` needs full coverage;
+  title similarity breaks score ties. Results: `evidence/evaluation/tuning-match-1-vs-match-2.json`.
+- **Caveat:** product labels are incomplete (near-duplicate recalls of the same product count
+  as FP), so product precision remains a lower bound.

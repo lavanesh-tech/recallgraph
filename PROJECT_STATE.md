@@ -4,7 +4,7 @@ Handoff document for continuing work in a new conversation. Keep it current afte
 
 ## Snapshot
 - **Repo:** `~/Desktop/recallgraph` → https://github.com/lavanesh-tech/recallgraph (public)
-- **Current step:** 13 of 32 — Labeled evaluation set and harness (in progress)
+- **Current step:** 15 of 32 — Authentication and authorization (next)
 - **Next step:** 7 — CPSC ingestion pipeline (resilient HTTP client, idempotent raw storage via
   `RawRecordRepository`, CLI command, synthetic tests, one real ingestion run → `evidence/`)
 - **Git identity:** LAVANESH <lavanesh532@gmail.com>. User runs all git commands. No AI co-authors.
@@ -71,4 +71,7 @@ in-batch dedupe, run lifecycle, DB check constraint).
 None.
 
 ## Measured metrics
+- Matching (eval-v1 held-out test split, strict): precision 0.226 -> 0.646, F1 0.368 -> 0.780, recall 0.986, hit@1 0.888 -> 0.930, negative-query FPR 0.0 (evidence/evaluation/tuning-match-1-vs-match-2.json).
+- Identifier matching: precision 1.0, recall 1.0 (150 cases).
+- Data: 40,348 normalized recalls from CPSC (10,027) + NHTSA (30,321).
 None yet. Only metrics with evidence under `evidence/` may be claimed.

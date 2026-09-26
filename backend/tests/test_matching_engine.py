@@ -1,5 +1,6 @@
 """Pure scoring-engine tests on SYNTHETIC candidate profiles (no database)."""
 
+from dataclasses import replace
 from datetime import date
 
 import pytest
@@ -35,6 +36,7 @@ def profile(
         recall_date=recall_date,
         url=None,
         text_tokens=frozenset(tokenize(f"{title} {text}")),
+        product_tokens=frozenset(tokenize(f"{title} {text}")),
         title_tokens=title_tokens(title),
         identifiers=identifiers,
         companies=companies,
@@ -132,3 +134,35 @@ def test_ranking_orders_by_tier_then_score() -> None:
     assert exact is not None and loose is not None
 
     assert [r.profile.recall_id for r in rank([loose, exact])] == [1, 2]
+
+
+def test_lexical_evidence_ignores_long_defect_text() -> None:
+    p = profile(text="acme air fryers")
+    generic = replace(p, text_tokens=p.text_tokens | {"brake"})
+
+    result = score_candidate(MatchQuery(manufacturer="Acme", description="brake"), generic)
+
+    assert result is not None
+    assert signal(result, "lexical").value == 0.0
+    assert result.tier == "possible"
+
+
+def test_likely_requires_full_product_term_coverage() -> None:
+    q = MatchQuery(manufacturer="Acme Manufacturing", description="air fryer basket")
+
+    result = score_candidate(q, profile())
+
+    assert result is not None
+    assert result.tier == "possible"
+
+
+def test_rank_breaks_score_ties_by_title_similarity() -> None:
+    q = MatchQuery(description="air fryer")
+    close = score_candidate(q, profile(recall_id=5, title="Air Fryers Recalled", text=""))
+    far = score_candidate(
+        q, profile(recall_id=4, title="Kitchen Appliance Recall Air Fryers and Ovens", text="")
+    )
+    assert close is not None and far is not None
+    assert close.score == far.score
+
+    assert [r.profile.recall_id for r in rank([far, close], q)] == [5, 4]

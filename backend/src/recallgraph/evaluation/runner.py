@@ -8,7 +8,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from recallgraph.evaluation.dataset import EvalCase, read_dataset
+from recallgraph.evaluation.dataset import EvalCase, read_dataset, split_of
 from recallgraph.evaluation.metrics import CaseOutcome, evaluate
 from recallgraph.matching.engine import (
     ENGINE_VERSION,
@@ -44,9 +44,12 @@ async def run_cases(
 
 
 async def run_evaluation(
-    session_factory: async_sessionmaker[AsyncSession], dataset: Path, limit: int = 20
+    session_factory: async_sessionmaker[AsyncSession],
+    dataset: Path,
+    limit: int = 20,
+    split: str | None = None,
 ) -> dict[str, Any]:
-    cases = read_dataset(dataset)
+    cases = [c for c in read_dataset(dataset) if split is None or split_of(c.case_id) == split]
     started = time.perf_counter()
     outcomes = await run_cases(session_factory, cases, limit)
     duration = time.perf_counter() - started
@@ -62,6 +65,7 @@ async def run_evaluation(
         "dataset": {
             "path": str(dataset),
             "sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+            "split": split or "all",
             "cases": len(cases),
             "by_kind": dict(sorted(Counter(c.kind for c in cases).items())),
         },

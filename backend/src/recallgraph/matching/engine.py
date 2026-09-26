@@ -13,7 +13,7 @@ from datetime import date
 from recallgraph.matching.text import content_terms, extract_year, tokenize
 from recallgraph.normalization.text import normalize_company_name, normalize_identifier
 
-ENGINE_VERSION = "match-1"
+ENGINE_VERSION = "match-2"
 WEIGHTS: dict[str, float] = {
     "identifier": 0.40,
     "manufacturer": 0.25,
@@ -24,7 +24,9 @@ WEIGHTS: dict[str, float] = {
 LIKELY_THRESHOLD = 0.60
 POSSIBLE_THRESHOLD = 0.35
 IDENTITY_MIN = 0.6  # identifier-family or manufacturer evidence needed for "likely"
-PRODUCT_EVIDENCE_MIN = 0.5  # lexical or category evidence needed for "likely"
+# match-2: every product term must appear in the recall's title/product names for "likely"
+# (dev-split error analysis: all true matches had full coverage; partial coverage drove FPs).
+PRODUCT_EVIDENCE_MIN = 1.0
 FAMILY_MIN_LENGTH = 4
 TIER_RANK = {"identifier_match": 0, "likely": 1, "possible": 2}
 
@@ -51,7 +53,8 @@ class CandidateProfile:
     title: str
     recall_date: date | None
     url: str | None
-    text_tokens: frozenset[str]
+    text_tokens: frozenset[str]  # title + description + product names (retrieval context)
+    product_tokens: frozenset[str]  # title + product names/types only (lexical evidence)
     title_tokens: frozenset[str]
     identifiers: tuple[tuple[str, str, str], ...]  # (kind, value, normalized_value)
     companies: tuple[tuple[str, str, str], ...]  # (normalized_name, display_name, role)
@@ -116,8 +119,10 @@ def _manufacturer(q: MatchQuery, p: CandidateProfile) -> Raw:
 def _overlap(terms: list[str], p: CandidateProfile, label: str) -> Raw:
     if not terms:
         return NOT_APPLICABLE
-    hit = [t for t in terms if t in p.text_tokens]
-    miss = [t for t in terms if t not in p.text_tokens]
+    # match-2: long defect descriptions share generic words ("may", "fail", "fmvss"), so
+    # evidence is measured against the recall's title and product names only.
+    hit = [t for t in terms if t in p.product_tokens]
+    miss = [t for t in terms if t not in p.product_tokens]
     evidence = f"{label} terms matched: {', '.join(hit) or 'none'}"
     if miss:
         evidence += f"; not found: {', '.join(miss)}"
@@ -173,12 +178,22 @@ def score_candidate(q: MatchQuery, p: CandidateProfile) -> MatchResult | None:
     return MatchResult(profile=p, score=score, tier=tier, signals=signals)
 
 
-def rank(results: list[MatchResult]) -> list[MatchResult]:
+def _title_overlap(terms: list[str], p: CandidateProfile) -> float:
+    if not terms:
+        return 0.0
+    matched = len(set(terms) & p.title_tokens)
+    return matched / (len(set(terms) | p.title_tokens) or 1)
+
+
+def rank(results: list[MatchResult], q: MatchQuery | None = None) -> list[MatchResult]:
+    """Tier, then score, then (match-2) title similarity to the query as a tie-breaker."""
+    terms = query_terms(q) if q else []
     return sorted(
         results,
         key=lambda r: (
             TIER_RANK[r.tier],
             -r.score,
+            -_title_overlap(terms, r.profile),
             -(r.profile.recall_date.toordinal() if r.profile.recall_date else 0),
             r.profile.recall_id,
         ),

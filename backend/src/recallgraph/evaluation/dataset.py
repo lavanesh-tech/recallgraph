@@ -12,6 +12,7 @@ they are never produced by the matching engine itself:
                from the data, or a real product description with a fictitious manufacturer.
 """
 
+import hashlib
 import json
 import random
 from dataclasses import asdict, dataclass
@@ -34,6 +35,11 @@ from recallgraph.recalls.models import (
 DATASET_FORMAT = "recallgraph-eval-1"
 MAX_RECALLS_PER_IDENTIFIER = 10
 FICTITIOUS_COMPANIES = ("Zorvexa Holdings", "Quintrel Appliance Group", "Varnoth Industries")
+
+
+def split_of(case_id: str) -> str:
+    """Stable 50/50 split: tune on "dev", report held-out results on "test"."""
+    return "dev" if int(hashlib.sha256(case_id.encode()).hexdigest()[:8], 16) % 2 == 0 else "test"
 
 
 @dataclass(frozen=True, slots=True)

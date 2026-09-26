@@ -129,6 +129,7 @@ async def load_profiles(session: AsyncSession, ids: list[int]) -> list[Candidate
                 recall_date=recall_date,
                 url=url,
                 text_tokens=frozenset(tokenize(" ".join(text))),
+                product_tokens=frozenset(tokenize(" ".join([title, *texts[rid]]))),
                 title_tokens=title_tokens(title),
                 identifiers=tuple(idents[rid]),
                 companies=tuple(companies[rid]),

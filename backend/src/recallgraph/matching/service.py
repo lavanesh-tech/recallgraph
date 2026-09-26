@@ -18,4 +18,4 @@ async def match_product(session: AsyncSession, q: MatchQuery, limit: int) -> Mat
     ids = await candidate_ids(session, q)
     profiles = await load_profiles(session, ids)
     scored = [r for p in profiles if (r := score_candidate(q, p)) is not None]
-    return MatchOutcome(results=rank(scored)[:limit], candidates_considered=len(ids))
+    return MatchOutcome(results=rank(scored, q)[:limit], candidates_considered=len(ids))
