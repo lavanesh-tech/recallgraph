@@ -58,6 +58,7 @@ class CandidateProfile:
     title_tokens: frozenset[str]
     identifiers: tuple[tuple[str, str, str], ...]  # (kind, value, normalized_value)
     companies: tuple[tuple[str, str, str], ...]  # (normalized_name, display_name, role)
+    semantic_similarity: float | None = None  # cosine similarity, when semantic is enabled
 
 
 @dataclass(frozen=True, slots=True)
@@ -138,25 +139,36 @@ def _date(q: MatchQuery, p: CandidateProfile) -> Raw:
     return (True, round(value, 4), f"recall dated {p.recall_date}; purchase year {year}")
 
 
-def score_candidate(q: MatchQuery, p: CandidateProfile) -> MatchResult | None:
+def _semantic(p: CandidateProfile, weight: float) -> Raw:
+    if weight <= 0 or p.semantic_similarity is None:
+        return (False, 0.0, "semantic retrieval not enabled")
+    similarity = max(0.0, p.semantic_similarity)
+    return (True, similarity, f"embedding cosine similarity {similarity:.3f}")
+
+
+def score_candidate(
+    q: MatchQuery, p: CandidateProfile, semantic_weight: float = 0.0
+) -> MatchResult | None:
     """Return a scored, explained match, or None if the candidate is not even 'possible'."""
+    weights = {**WEIGHTS, "semantic": semantic_weight}
     raws = {
         "identifier": _identifier(q, p),
         "manufacturer": _manufacturer(q, p),
         "category": _overlap(content_terms(q.category), p, "category"),
         "lexical": _overlap(content_terms(q.description), p, "description"),
         "date": _date(q, p),
+        "semantic": _semantic(p, semantic_weight),
     }
-    applicable_weight = sum(WEIGHTS[n] for n, (ok, _, _) in raws.items() if ok)
+    applicable_weight = sum(weights[n] for n, (ok, _, _) in raws.items() if ok)
     if applicable_weight == 0:
         return None
     signals = tuple(
         Signal(
             name=name,
             applicable=ok,
-            weight=WEIGHTS[name],
+            weight=weights[name],
             value=round(value, 4),
-            contribution=round(WEIGHTS[name] * value / applicable_weight, 4) if ok else 0.0,
+            contribution=round(weights[name] * value / applicable_weight, 4) if ok else 0.0,
             evidence=evidence,
         )
         for name, (ok, value, evidence) in raws.items()

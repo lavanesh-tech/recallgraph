@@ -34,6 +34,7 @@ from recallgraph.events.worker import dead_letters, process_batch, queue_depth, 
 from recallgraph.ingestion.runner import IngestionSummary, ingest_cpsc, run_ingestion
 from recallgraph.ingestion.sources.cpsc import CpscRecallClient, year_windows
 from recallgraph.ingestion.sources.nhtsa import NhtsaAdapter, NhtsaRecallClient
+from recallgraph.matching.service import SemanticContext
 from recallgraph.normalization.service import NORMALIZERS, normalize_source_records
 from recallgraph.provenance.models import IngestionRun, RawRecord, Source
 from recallgraph.radar.service import run_radar
@@ -46,6 +47,20 @@ from recallgraph.recalls.models import (
     RecallProduct,
     RecallRemedy,
 )
+from recallgraph.semantic.embedder import FastEmbedder
+from recallgraph.semantic.index import build_embeddings
+
+# Pre-registered for the Step 19 experiment (docs/experiments/semantic-retrieval.md).
+SEMANTIC_SIGNAL_WEIGHT = 0.15
+
+
+async def _semantic_build(settings: Settings) -> dict[str, Any]:
+    engine = create_engine(settings)
+    try:
+        stats = await build_embeddings(create_session_factory(engine), FastEmbedder())
+    finally:
+        await engine.dispose()
+    return {"model": FastEmbedder.model_name, **asdict(stats)}
 
 
 def _http_client() -> httpx.AsyncClient:
@@ -193,8 +208,20 @@ async def _eval_build(settings: Settings, args: argparse.Namespace) -> dict[str,
 async def _eval_run(settings: Settings, args: argparse.Namespace) -> dict[str, Any]:
     engine = create_engine(settings)
     try:
+        semantic = None
+        if args.variant != "baseline":
+            semantic = SemanticContext(
+                embedder=FastEmbedder(),
+                add_candidates=True,
+                weight=SEMANTIC_SIGNAL_WEIGHT if args.variant == "semantic-signal" else 0.0,
+            )
         report = await run_evaluation(
-            create_session_factory(engine), Path(args.dataset), limit=args.limit, split=args.split
+            create_session_factory(engine),
+            Path(args.dataset),
+            limit=args.limit,
+            split=args.split,
+            semantic=semantic,
+            variant=args.variant,
         )
     finally:
         await engine.dispose()
@@ -301,6 +328,15 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--dataset", required=True)
     run.add_argument("--limit", type=int, default=20)
     run.add_argument("--split", choices=["dev", "test"], default=None)
+    run.add_argument(
+        "--variant",
+        choices=["baseline", "semantic-candidates", "semantic-signal"],
+        default="baseline",
+    )
+
+    semantic_cmd = commands.add_parser("semantic", help="embedding index (experiment)")
+    semantic_commands = semantic_cmd.add_subparsers(dest="semantic_command", required=True)
+    semantic_commands.add_parser("build", help="embed recall product text into pgvector")
 
     radar = commands.add_parser("radar", help="Recall Radar")
     radar_commands = radar.add_subparsers(dest="radar_command", required=True)
@@ -337,6 +373,8 @@ def main(argv: list[str] | None = None) -> int:
         result = asyncio.run(_radar_cycle(settings, args.cpsc_from_year))
     elif args.command == "worker":
         result = asyncio.run(_worker(settings, args))
+    elif args.command == "semantic":
+        result = asyncio.run(_semantic_build(settings))
     else:
         result = asyncio.run(_stats(settings))
     sys.stdout.write(json.dumps(result, indent=2) + "\n")

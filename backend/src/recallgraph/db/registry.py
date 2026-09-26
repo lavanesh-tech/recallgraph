@@ -6,6 +6,7 @@ from recallgraph.inventory import models as inventory_models
 from recallgraph.provenance import models as provenance_models
 from recallgraph.radar import models as radar_models
 from recallgraph.recalls import models as recall_models
+from recallgraph.semantic import models as semantic_models
 
 __all__ = [
     "auth_models",
@@ -14,4 +15,5 @@ __all__ = [
     "provenance_models",
     "radar_models",
     "recall_models",
+    "semantic_models",
 ]

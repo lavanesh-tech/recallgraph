@@ -19,16 +19,19 @@ from recallgraph.matching.engine import (
     WEIGHTS,
     MatchQuery,
 )
-from recallgraph.matching.service import match_product
+from recallgraph.matching.service import SemanticContext, match_product
 
 
 async def run_cases(
-    session_factory: async_sessionmaker[AsyncSession], cases: list[EvalCase], limit: int
+    session_factory: async_sessionmaker[AsyncSession],
+    cases: list[EvalCase],
+    limit: int,
+    semantic: SemanticContext | None = None,
 ) -> list[CaseOutcome]:
     outcomes: list[CaseOutcome] = []
     async with session_factory() as session:
         for case in cases:
-            outcome = await match_product(session, MatchQuery(**case.query), limit)
+            outcome = await match_product(session, MatchQuery(**case.query), limit, semantic)
             outcomes.append(
                 CaseOutcome(
                     case_id=case.case_id,
@@ -48,13 +51,25 @@ async def run_evaluation(
     dataset: Path,
     limit: int = 20,
     split: str | None = None,
+    semantic: SemanticContext | None = None,
+    variant: str = "baseline",
 ) -> dict[str, Any]:
     cases = [c for c in read_dataset(dataset) if split is None or split_of(c.case_id) == split]
     started = time.perf_counter()
-    outcomes = await run_cases(session_factory, cases, limit)
+    outcomes = await run_cases(session_factory, cases, limit, semantic)
     duration = time.perf_counter() - started
     return {
         "engine_version": ENGINE_VERSION,
+        "variant": variant,
+        "semantic": (
+            {
+                "model": semantic.embedder.model_name,
+                "add_candidates": semantic.add_candidates,
+                "weight": semantic.weight,
+            }
+            if semantic
+            else None
+        ),
         "engine_config": {
             "weights": WEIGHTS,
             "likely_threshold": LIKELY_THRESHOLD,

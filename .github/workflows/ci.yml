@@ -22,7 +22,7 @@ jobs:
         working-directory: backend
     services:
       postgres:
-        image: postgres:17
+        image: pgvector/pgvector:pg17
         env:
           POSTGRES_USER: recallgraph
           POSTGRES_PASSWORD: recallgraph
