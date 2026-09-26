@@ -141,3 +141,8 @@ for a handful of authenticated pages over an existing API.
   with `mode` and `fallback_reason` in the response. Tests use fakes only (no network/cost);
   real calls happen only via the opt-in `recallgraph explain eval`.
 - Plain OpenAI SDK, no LangChain: one structured call needs no orchestration framework.
+
+## D-018 Security hardening scope
+Pure ASGI middleware for security headers, a 64 KiB body limit and an in-process auth rate
+limiter; CORS closed by default; docs disabled outside local/test. CI adds gitleaks, pip-audit
+and npm audit. No external WAF/Redis yet: single instance; limitation recorded in docs/SECURITY.md.

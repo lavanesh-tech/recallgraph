@@ -53,6 +53,12 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     openai_timeout_s: float = Field(default=20.0, gt=0, le=120)
 
+    # Security hardening
+    auth_rate_limit_per_minute: int = Field(default=30, ge=1, le=10_000)
+    max_body_bytes: int = Field(default=65_536, ge=1_024, le=10_485_760)
+    # Browser origins allowed to call the API cross-origin (JSON list). Empty = none.
+    cors_origins: list[str] = Field(default_factory=list)
+
     @model_validator(mode="after")
     def _require_real_secret_when_deployed(self) -> Self:
         if self.environment in ("staging", "production"):
