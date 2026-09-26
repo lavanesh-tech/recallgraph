@@ -25,7 +25,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 19 | Semantic retrieval experiment | done (rejected by pre-registered rule) |
 | 20 | Grounded AI explanations | done |
 | 21 | Frontend foundation (React + JavaScript + HTML/CSS via Vite, no Next.js) | done |
-| 22 | Frontend product features (React) | planned |
+| 22 | Frontend product features (React) | done |
 | 23 | Security hardening | planned |
 | 24 | End-to-end testing and coverage | planned |
 | 25 | Full containerization | planned |

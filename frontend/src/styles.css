@@ -24,3 +24,15 @@ button.link { border: none; background: none; color: var(--accent); cursor: poin
 .error { color: var(--err); }
 .disclaimer { background: var(--warn-bg); padding: 10px 12px; border-radius: 8px; font-size: 14px; }
 .narrow { max-width: 380px; }
+.topbar nav a { text-decoration: none; }
+.row { display: flex; gap: 12px; margin-top: 6px; }
+.tier { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.tier-identifier_match { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tier-likely { border-color: var(--accent); color: var(--accent); }
+.signals { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+.signals th, .signals td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.unread { border-left: 3px solid var(--accent); padding-left: 8px; }
+.panel { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--line); }
+.cite { font-family: ui-monospace, monospace; font-size: 12px; color: var(--muted); }
+.evidence { font-size: 14px; }
+details summary { cursor: pointer; color: var(--muted); font-size: 14px; }

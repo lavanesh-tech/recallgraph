@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { api } from "../api/client.js";
 import Disclaimer from "../components/Disclaimer.jsx";
 import ErrorMessage from "../components/ErrorMessage.jsx";
+import ExplanationPanel from "../components/ExplanationPanel.jsx";
 
 export default function RecallPage() {
   const { id } = useParams();
@@ -35,6 +36,7 @@ export default function RecallPage() {
       <h2>Remedies</h2>
       <ul>{list(recall.remedies, "description")}</ul>
       <Disclaimer text={recall.disclaimer} />
+      <ExplanationPanel recallId={recall.id ?? id} />
     </article>
   );
 }
