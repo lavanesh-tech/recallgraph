@@ -1,0 +1,30 @@
+{
+  "recorded_at": "2026-09-26T15:30:00Z",
+  "git_commit": "c447760",
+  "environment": "local macOS arm64, Postgres 17 (Docker)",
+  "command": "uv run recallgraph ingest cpsc --from-year 1970",
+  "source_api": "https://www.saferproducts.gov/RestWebServices/Recall",
+  "run": {
+    "run_id": "5a9cbd92-c241-4f2c-b2b2-9783259a14e5",
+    "source": "cpsc",
+    "status": "succeeded",
+    "year_windows": 57,
+    "records_seen": 10027,
+    "records_inserted": 10027,
+    "records_unchanged": 0,
+    "duration_s": 55.421,
+    "records_per_s": 180.9
+  },
+  "dataset": {
+    "generated_at": "2026-09-26T15:30:57.358454+00:00",
+    "sources": {
+      "cpsc": {
+        "distinct_records": 10027,
+        "stored_versions": 10027
+      }
+    },
+    "ingestion_runs_by_status": {
+      "succeeded": 1
+    }
+  }
+}
