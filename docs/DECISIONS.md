@@ -102,3 +102,19 @@ Another user's item returns 404, not 403, so item ids cannot be probed. Request 
   NOTHING` makes runs idempotent; watermarks overlap 5 minutes to tolerate late commits.
 - One transaction with `pg_try_advisory_xact_lock` prevents concurrent runs.
 - Whether this needs an event-driven pipeline is evaluated in Step 18.
+
+## D-014 Event-driven Radar: transactional outbox on PostgreSQL, not Kafka
+- **Justification check (measured, `evidence/architecture/event-driven-justification.json`):**
+  a few new official recalls per day across both agencies; one full scheduled cycle ~19 s;
+  a single consumer (notification delivery).
+- **Kafka would be justified by:** several independent consumer services, sustained throughput
+  beyond what a polled PostgreSQL queue handles, or long-term event replay/stream processing.
+  None applies, so Kafka would add a broker, schema/ops burden and failure modes with no
+  measured benefit.
+- **What IS needed:** delivery must not block or fail the radar transaction; retries; no lost
+  or duplicated notifications. Implemented with a transactional outbox (alert + event in one
+  transaction), a worker using `FOR UPDATE SKIP LOCKED`, exponential backoff, dead-lettering
+  after 5 attempts with replay, an idempotency table (one notification per alert/channel) and
+  deterministic email Message-IDs. Tested: duplicates, concurrency, crash mid-batch, DLQ.
+- **Revisit** if a second consumer (e.g. push notifications, analytics) or measured load
+  appears; the outbox then becomes the source for a relay into a broker.

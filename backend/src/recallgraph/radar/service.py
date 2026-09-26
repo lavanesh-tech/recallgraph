@@ -20,6 +20,7 @@ from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from recallgraph.events.worker import alert_created_event
 from recallgraph.inventory.models import InventoryItem
 from recallgraph.inventory.service import to_match_query
 from recallgraph.matching.candidates import load_profiles
@@ -62,7 +63,11 @@ async def _alert(session: AsyncSession, item: InventoryItem, result: MatchResult
         .returning(RadarAlert.id)
     )
     created = (await session.execute(stmt)).scalar_one_or_none()
-    return 1 if created is not None else 0
+    if created is None:
+        return 0
+    # Transactional outbox: the event commits (or rolls back) together with the alert.
+    session.add(alert_created_event(created, item.user_id))
+    return 1
 
 
 async def _scan(session: AsyncSession, started: datetime) -> RadarRun:

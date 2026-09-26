@@ -13,6 +13,7 @@ import asyncio
 import json
 import sys
 import time
+import uuid
 from dataclasses import asdict
 from datetime import UTC, datetime
 from importlib.metadata import version
@@ -28,6 +29,8 @@ from recallgraph.db.base import Base
 from recallgraph.db.session import create_engine, create_session_factory
 from recallgraph.evaluation.dataset import DATASET_FORMAT, build_dataset, write_dataset
 from recallgraph.evaluation.runner import run_evaluation
+from recallgraph.events.senders import SmtpSender
+from recallgraph.events.worker import dead_letters, process_batch, queue_depth, replay_dead
 from recallgraph.ingestion.runner import IngestionSummary, ingest_cpsc, run_ingestion
 from recallgraph.ingestion.sources.cpsc import CpscRecallClient, year_windows
 from recallgraph.ingestion.sources.nhtsa import NhtsaAdapter, NhtsaRecallClient
@@ -229,6 +232,44 @@ async def _radar_cycle(settings: Settings, cpsc_from_year: int) -> dict[str, Any
     }
 
 
+async def _worker(settings: Settings, args: argparse.Namespace) -> dict[str, Any]:
+    engine = create_engine(settings)
+    factory = create_session_factory(engine)
+    sender = SmtpSender(settings.smtp_host, settings.smtp_port, settings.mail_from)
+    totals: dict[str, Any] = {
+        "batches": 0,
+        "claimed": 0,
+        "sent": 0,
+        "duplicates": 0,
+        "skipped": 0,
+        "retried": 0,
+        "dead": 0,
+    }
+    try:
+        if args.worker_command == "dead-letters":
+            async with factory() as session:
+                return {"dead_letters": await dead_letters(session)}
+        if args.worker_command == "replay":
+            async with factory() as session:
+                event_id = uuid.UUID(args.event_id) if args.event_id else None
+                return {"replayed": await replay_dead(session, event_id)}
+        if args.worker_command == "status":
+            async with factory() as session:
+                return {"queue": await queue_depth(session)}
+        while True:
+            stats = await process_batch(factory, sender, batch_size=args.batch_size)
+            totals["batches"] += 1
+            for key, value in asdict(stats).items():
+                if key in totals:
+                    totals[key] += value
+            if args.once or (args.drain and stats.claimed == 0):
+                return totals
+            if stats.claimed == 0:
+                await asyncio.sleep(args.interval)
+    finally:
+        await engine.dispose()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="recallgraph")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -266,6 +307,18 @@ def main(argv: list[str] | None = None) -> int:
     radar_commands.add_parser("run", help="match new recalls and changed items")
     cycle = radar_commands.add_parser("cycle", help="ingest + normalize + radar run")
     cycle.add_argument("--cpsc-from-year", type=int, default=datetime.now(UTC).year - 1)
+
+    worker = commands.add_parser("worker", help="outbox notification worker")
+    worker_commands = worker.add_subparsers(dest="worker_command", required=True)
+    work = worker_commands.add_parser("run", help="deliver pending outbox events")
+    work.add_argument("--once", action="store_true", help="process one batch")
+    work.add_argument("--drain", action="store_true", help="stop when the queue is empty")
+    work.add_argument("--batch-size", type=int, default=50)
+    work.add_argument("--interval", type=float, default=5.0)
+    worker_commands.add_parser("status", help="outbox queue depth by status")
+    worker_commands.add_parser("dead-letters", help="list dead-lettered events")
+    replay = worker_commands.add_parser("replay", help="requeue dead-lettered events")
+    replay.add_argument("--event-id", default=None)
     args = parser.parse_args(argv)
 
     settings = get_settings()
@@ -282,6 +335,8 @@ def main(argv: list[str] | None = None) -> int:
         result = asyncio.run(_radar_run(settings))
     elif args.command == "radar":
         result = asyncio.run(_radar_cycle(settings, args.cpsc_from_year))
+    elif args.command == "worker":
+        result = asyncio.run(_worker(settings, args))
     else:
         result = asyncio.run(_stats(settings))
     sys.stdout.write(json.dumps(result, indent=2) + "\n")

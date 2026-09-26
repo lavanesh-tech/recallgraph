@@ -30,7 +30,7 @@ async def db_session(migrated_database: str) -> AsyncIterator[AsyncSession]:
     async with engine.begin() as connection:
         await connection.execute(
             text(
-                "TRUNCATE radar_runs, users, audit_events, companies, "
+                "TRUNCATE outbox_events, radar_runs, users, audit_events, companies, "
                 "raw_records, ingestion_runs, sources "
                 "RESTART IDENTITY CASCADE"
             )
@@ -52,7 +52,7 @@ async def session_factory(
     async with engine.begin() as connection:
         await connection.execute(
             text(
-                "TRUNCATE radar_runs, users, audit_events, companies, "
+                "TRUNCATE outbox_events, radar_runs, users, audit_events, companies, "
                 "raw_records, ingestion_runs, sources "
                 "RESTART IDENTITY CASCADE"
             )

@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     access_token_ttl_s: int = Field(default=900, ge=60, le=3600)
     refresh_token_ttl_s: int = Field(default=1_209_600, ge=3600, le=7_776_000)
 
+    # Local Mailpit (docker compose) by default; a real SMTP relay when deployed.
+    smtp_host: str = "127.0.0.1"
+    smtp_port: int = Field(default=1026, ge=1, le=65535)
+    mail_from: str = "RecallGraph Radar <radar@recallgraph.local>"
+
     @model_validator(mode="after")
     def _require_real_secret_when_deployed(self) -> Self:
         if self.environment in ("staging", "production"):
