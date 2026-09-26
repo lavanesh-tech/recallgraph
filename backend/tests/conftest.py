@@ -3,9 +3,9 @@ from collections.abc import AsyncIterator
 import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
-from recallgraph.main import create_app
 
 from recallgraph.core.config import Settings
+from recallgraph.main import create_app
 
 
 @pytest.fixture

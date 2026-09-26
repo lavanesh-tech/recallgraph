@@ -51,3 +51,6 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "ruff>=0.16.9",
 ]
+
+[tool.ruff.lint.isort]
+known-first-party = ["recallgraph"]
