@@ -11,7 +11,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 5 | Database platform | done |
 | 6 | Provenance data model | done |
 | 7 | CPSC ingestion pipeline | done |
-| 8 | Recall domain and normalization | in progress |
+| 8 | Recall domain and normalization | done |
 | 9 | Second authoritative source | planned |
 | 10 | Search API v1 | planned |
 | 11 | Safety history | planned |
