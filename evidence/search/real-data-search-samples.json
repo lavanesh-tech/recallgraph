@@ -1,0 +1,119 @@
+{
+  "recorded_at": "2026-09-26T16:12:05Z",
+  "git_commit": "c75f92e",
+  "environment": "local macOS arm64, Postgres 17 (Docker), 40,348 real recalls (CPSC+NHTSA)",
+  "endpoint": "GET /api/v1/recalls",
+  "sample_searches": [
+    {
+      "query": "q=air%20fryer",
+      "total": 14,
+      "top": [
+        {
+          "source": "cpsc",
+          "source_record_id": "9289",
+          "title": "Best Buy Recalls Insignia™ Air Fryers and Air Fryer Ovens Due to Fire and Burn Hazards",
+          "score": 5.9804
+        },
+        {
+          "source": "cpsc",
+          "source_record_id": "9892",
+          "title": "Best Buy Recalls Insignia® Air Fryers and Air Fryer Ovens Due to Fire, Burn and Laceration Hazards",
+          "score": 5.4846
+        },
+        {
+          "source": "cpsc",
+          "source_record_id": "9423",
+          "title": "Newair Recalls Magic Chef Air Fryers Due to Fire and Burn Hazards",
+          "score": 3.364
+        }
+      ]
+    },
+    {
+      "query": "q=takata%20airbag",
+      "total": 0,
+      "top": []
+    },
+    {
+      "query": "q=lithium%20battery%20fire",
+      "total": 154,
+      "top": [
+        {
+          "source": "cpsc",
+          "source_record_id": "10076",
+          "title": "Humane Recalls Charge Case Accessory for Ai Pin Due to Lithium Battery Fire Hazard",
+          "score": 2.03
+        },
+        {
+          "source": "cpsc",
+          "source_record_id": "9102",
+          "title": "American Outdoor Brands Recalls Caldwell Earmuffs with Rechargeable Lithium-Battery Packs Due to Fire and Burn Hazards",
+          "score": 1.105
+        },
+        {
+          "source": "cpsc",
+          "source_record_id": "10321",
+          "title": "DR Power Recalls Lithium-Ion Battery Packs Due to Fire and Burn Hazards",
+          "score": 0.9833
+        }
+      ]
+    },
+    {
+      "query": "manufacturer=ford&source=nhtsa",
+      "total": 1752,
+      "top": [
+        {
+          "source": "nhtsa",
+          "source_record_id": "26V605000",
+          "title": "Rearview Camera Image May Not Display/FMVSS 111",
+          "score": null
+        },
+        {
+          "source": "nhtsa",
+          "source_record_id": "26E065000",
+          "title": "Rearview Camera Image May Not Display/FMVSS 111",
+          "score": null
+        },
+        {
+          "source": "nhtsa",
+          "source_record_id": "26V582000",
+          "title": "Loss of Power or Fire Risk from Incorrect BECM Software",
+          "score": null
+        }
+      ]
+    },
+    {
+      "query": "q=crib&date_from=2020-01-01",
+      "total": 49,
+      "top": [
+        {
+          "source": "cpsc",
+          "source_record_id": "9914",
+          "title": "Zazaba International Recalls Grão de Gente Crib Bumpers Due to Suffocation Hazard; Violation of Federal Crib Bumper Ban; Sold Exclusively on Zazaba.com",
+          "score": 17.8
+        },
+        {
+          "source": "cpsc",
+          "source_record_id": "10098",
+          "title": "South Shore Cribs Recalled Due to Entrapment Hazard; Violation of Federal Regulation for Full Sized Cribs; Imported by South Shore Industries",
+          "score": 6.0
+        },
+        {
+          "source": "cpsc",
+          "source_record_id": "9688",
+          "title": "Restwell Mattress Recalls Room & Board Crib Mattresses Due to Suffocation Hazard for Infants; Failure to Comply with Federal Safety Standard for Crib Mattresses; Sold Exclusively at Room & Board (Recall Alert)",
+          "score": 4.6
+        }
+      ]
+    }
+  ],
+  "query_plan": [
+    "Bitmap Heap Scan on recalls  (cost=121.13..140.75 rows=5 width=8)",
+    "  Recheck Cond: ((search_vector @@ '''air'' & ''fryer'''::tsquery) OR (title %> 'air fryer'::text))",
+    "  ->  BitmapOr  (cost=121.13..121.13 rows=5 width=0)",
+    "        ->  Bitmap Index Scan on ix_recalls_search_vector  (cost=0.00..30.06 rows=1 width=0)",
+    "              Index Cond: (search_vector @@ '''air'' & ''fryer'''::tsquery)",
+    "        ->  Bitmap Index Scan on ix_recalls_title_trgm  (cost=0.00..91.07 rows=4 width=0)",
+    "              Index Cond: (title %> 'air fryer'::text)",
+    ""
+  ]
+}
