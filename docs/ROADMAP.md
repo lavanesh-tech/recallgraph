@@ -15,7 +15,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 9 | Second authoritative source | done |
 | 10 | Search API v1 | done |
 | 11 | Safety history | done |
-| 12 | Explainable matching engine | planned |
+| 12 | Explainable matching engine | done |
 | 13 | Labeled evaluation set and harness | planned |
 | 14 | Matching tuning | planned |
 | 15 | Authentication and authorization | planned |

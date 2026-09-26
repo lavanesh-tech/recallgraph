@@ -54,3 +54,14 @@ not planned.
   is not a safety determination.
 - **Consequences:** No extra infrastructure (Elasticsearch/OpenSearch) to run. Revisit only if
   measured latency or relevance (Step 13 evaluation) shows PostgreSQL is insufficient.
+
+## D-009 Explainable, deterministic matching (engine match-1)
+- **Candidates:** union of identifier (exact + model-family prefix), whole-token manufacturer,
+  and OR-full-text retrieval; at most 200 per channel.
+- **Signals (weight):** identifier 0.40, manufacturer 0.25, category 0.10, lexical 0.20,
+  date compatibility 0.05. Score = weighted mean over *applicable* signals only; contributions
+  sum to the score and every signal carries human-readable evidence.
+- **Tiers:** `identifier_match` (exact model/UPC); `likely` (score >= 0.60 AND identity >= 0.6
+  AND product evidence >= 0.5); `possible` (score >= 0.35); otherwise not returned.
+- **Why:** no fabricated "AI confidence"; every number is reproducible and testable. Weights and
+  thresholds are initial values, to change only with evidence from the labeled evaluation set.
