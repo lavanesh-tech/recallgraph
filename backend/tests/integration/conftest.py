@@ -29,7 +29,9 @@ async def db_session(migrated_database: str) -> AsyncIterator[AsyncSession]:
     engine = create_async_engine(migrated_database)
     async with engine.begin() as connection:
         await connection.execute(
-            text("TRUNCATE raw_records, ingestion_runs, sources RESTART IDENTITY CASCADE")
+            text(
+                "TRUNCATE companies, raw_records, ingestion_runs, sources RESTART IDENTITY CASCADE"
+            )
         )
     factory = async_sessionmaker(engine, expire_on_commit=False)
     try:
@@ -47,7 +49,9 @@ async def session_factory(
     engine = create_async_engine(migrated_database)
     async with engine.begin() as connection:
         await connection.execute(
-            text("TRUNCATE raw_records, ingestion_runs, sources RESTART IDENTITY CASCADE")
+            text(
+                "TRUNCATE companies, raw_records, ingestion_runs, sources RESTART IDENTITY CASCADE"
+            )
         )
     try:
         yield async_sessionmaker(engine, expire_on_commit=False)

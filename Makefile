@@ -2,7 +2,7 @@ BACKEND := backend
 API_PORT ?= 8001
 FROM_YEAR ?= 1970
 
-.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run ingest-cpsc stats
+.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run ingest-cpsc stats normalize-cpsc
 
 install:
 	cd $(BACKEND) && uv sync
@@ -31,3 +31,5 @@ ingest-cpsc:
 	cd $(BACKEND) && uv run recallgraph ingest cpsc --from-year $(FROM_YEAR)
 stats:
 	cd $(BACKEND) && uv run recallgraph stats
+normalize-cpsc:
+	cd $(BACKEND) && uv run recallgraph normalize cpsc
