@@ -2,7 +2,16 @@
 
 from fastapi import APIRouter
 
-from recallgraph.api.v1 import auth, health, history, inventory, match, readiness, recalls
+from recallgraph.api.v1 import (
+    auth,
+    health,
+    history,
+    inventory,
+    match,
+    radar,
+    readiness,
+    recalls,
+)
 
 api_v1_router = APIRouter(prefix="/api/v1")
 api_v1_router.include_router(health.router)
@@ -14,3 +23,4 @@ api_v1_router.include_router(recalls.router)
 api_v1_router.include_router(history.companies_router)
 api_v1_router.include_router(match.router)
 api_v1_router.include_router(inventory.router)
+api_v1_router.include_router(radar.router)

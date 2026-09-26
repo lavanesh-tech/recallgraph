@@ -4,7 +4,7 @@ Handoff document for continuing work in a new conversation. Keep it current afte
 
 ## Snapshot
 - **Repo:** `~/Desktop/recallgraph` → https://github.com/lavanesh-tech/recallgraph (public)
-- **Current step:** 17 of 32 — Recall Radar core (next)
+- **Current step:** 18 of 32 — Event-driven Radar justification check (next)
 - **Next step:** 7 — CPSC ingestion pipeline (resilient HTTP client, idempotent raw storage via
   `RawRecordRepository`, CLI command, synthetic tests, one real ingestion run → `evidence/`)
 - **Git identity:** LAVANESH <lavanesh532@gmail.com>. User runs all git commands. No AI co-authors.
@@ -48,6 +48,9 @@ Modular monolith; FastAPI app factory `recallgraph.main:create_app`.
 | POST/GET | /api/v1/inventory | create (limit 200/user) / list own items (Bearer) |
 | GET/PATCH/DELETE | /api/v1/inventory/{id} | own items only; others are 404 |
 | GET | /api/v1/inventory/{id}/matches | explainable matches for a saved item |
+| GET | /api/v1/radar/alerts | own alerts (unread_only, pagination, unread count) |
+| POST | /api/v1/radar/alerts/{id}/read | mark one read (others 404) |
+| POST | /api/v1/radar/alerts/read-all | mark all own alerts read |
 
 ## Migrations
 - `0001_baseline` — empty chain start

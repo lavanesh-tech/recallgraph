@@ -2,7 +2,7 @@ BACKEND := backend
 API_PORT ?= 8001
 FROM_YEAR ?= 1970
 
-.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run ingest-cpsc stats normalize-cpsc ingest-nhtsa normalize-nhtsa
+.PHONY: install db-up db-down migrate migrate-check lint format typecheck test test-unit check run ingest-cpsc stats normalize-cpsc ingest-nhtsa normalize-nhtsa radar-run radar-cycle
 
 install:
 	cd $(BACKEND) && uv sync
@@ -37,3 +37,7 @@ ingest-nhtsa:
 	cd $(BACKEND) && uv run recallgraph ingest nhtsa
 normalize-nhtsa:
 	cd $(BACKEND) && uv run recallgraph normalize nhtsa
+radar-run:
+	cd $(BACKEND) && uv run recallgraph radar run
+radar-cycle:
+	cd $(BACKEND) && uv run recallgraph radar cycle

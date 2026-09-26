@@ -33,6 +33,7 @@ from recallgraph.ingestion.sources.cpsc import CpscRecallClient, year_windows
 from recallgraph.ingestion.sources.nhtsa import NhtsaAdapter, NhtsaRecallClient
 from recallgraph.normalization.service import NORMALIZERS, normalize_source_records
 from recallgraph.provenance.models import IngestionRun, RawRecord, Source
+from recallgraph.radar.service import run_radar
 from recallgraph.recalls.models import (
     Company,
     Recall,
@@ -197,6 +198,37 @@ async def _eval_run(settings: Settings, args: argparse.Namespace) -> dict[str, A
     return report
 
 
+async def _radar_run(settings: Settings) -> dict[str, Any]:
+    engine = create_engine(settings)
+    try:
+        summary = await run_radar(create_session_factory(engine))
+    finally:
+        await engine.dispose()
+    return {
+        "run_id": str(summary.run_id) if summary.run_id else None,
+        "status": summary.status,
+        "recalls_scanned": summary.recalls_scanned,
+        "items_scanned": summary.items_scanned,
+        "alerts_created": summary.alerts_created,
+        "duration_s": summary.duration_s,
+    }
+
+
+async def _radar_cycle(settings: Settings, cpsc_from_year: int) -> dict[str, Any]:
+    """Scheduled job: incremental ingestion of both sources, normalization, radar run."""
+    this_year = datetime.now(UTC).year
+    cpsc = argparse.Namespace(source="cpsc", from_year=cpsc_from_year, to_year=this_year)
+    nhtsa = argparse.Namespace(source="nhtsa", page_size=5000, max_pages=None)
+    return {
+        "ingest": [await _ingest(settings, cpsc), await _ingest(settings, nhtsa)],
+        "normalize": [
+            await _normalize(settings, "cpsc", False),
+            await _normalize(settings, "nhtsa", False),
+        ],
+        "radar": await _radar_run(settings),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="recallgraph")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -228,6 +260,12 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--dataset", required=True)
     run.add_argument("--limit", type=int, default=20)
     run.add_argument("--split", choices=["dev", "test"], default=None)
+
+    radar = commands.add_parser("radar", help="Recall Radar")
+    radar_commands = radar.add_subparsers(dest="radar_command", required=True)
+    radar_commands.add_parser("run", help="match new recalls and changed items")
+    cycle = radar_commands.add_parser("cycle", help="ingest + normalize + radar run")
+    cycle.add_argument("--cpsc-from-year", type=int, default=datetime.now(UTC).year - 1)
     args = parser.parse_args(argv)
 
     settings = get_settings()
@@ -240,6 +278,10 @@ def main(argv: list[str] | None = None) -> int:
         result = asyncio.run(_eval_build(settings, args))
     elif args.command == "eval":
         result = asyncio.run(_eval_run(settings, args))
+    elif args.command == "radar" and args.radar_command == "run":
+        result = asyncio.run(_radar_run(settings))
+    elif args.command == "radar":
+        result = asyncio.run(_radar_cycle(settings, args.cpsc_from_year))
     else:
         result = asyncio.run(_stats(settings))
     sys.stdout.write(json.dumps(result, indent=2) + "\n")

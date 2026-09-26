@@ -94,3 +94,11 @@ not planned.
 Every inventory query filters by the authenticated user's id in SQL (never by client input).
 Another user's item returns 404, not 403, so item ids cannot be probed. Request models use
 `extra="forbid"` to block mass assignment (e.g. `user_id`). 200 items per user (soft limit).
+
+## D-013 Recall Radar core (synchronous, in-database)
+- A run = reverse scan (recalls normalized since the recall watermark x all items, pure
+  in-memory scoring) + forward scan (items changed since the item watermark x catalog).
+- Alerts only for strict tiers; `UNIQUE (inventory_item_id, recall_id)` + `ON CONFLICT DO
+  NOTHING` makes runs idempotent; watermarks overlap 5 minutes to tolerate late commits.
+- One transaction with `pg_try_advisory_xact_lock` prevents concurrent runs.
+- Whether this needs an event-driven pipeline is evaluated in Step 18.
