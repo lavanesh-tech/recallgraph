@@ -22,10 +22,10 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 16 | Saved inventory | done |
 | 17 | Recall Radar core | done |
 | 18 | Event-driven Radar (justification check first) | done |
-| 19 | Semantic retrieval experiment | in progress |
+| 19 | Semantic retrieval experiment | done (rejected by pre-registered rule) |
 | 20 | Grounded AI explanations | planned |
-| 21 | Frontend foundation | planned |
-| 22 | Frontend product features | planned |
+| 21 | Frontend foundation (HTML/CSS/JavaScript, no framework) | planned |
+| 22 | Frontend product features (HTML/CSS/JavaScript) | planned |
 | 23 | Security hardening | planned |
 | 24 | End-to-end testing and coverage | planned |
 | 25 | Full containerization | planned |

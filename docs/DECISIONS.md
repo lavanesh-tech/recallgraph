@@ -118,3 +118,15 @@ Another user's item returns 404, not 403, so item ids cannot be probed. Request 
   deterministic email Message-IDs. Tested: duplicates, concurrency, crash mid-batch, DLQ.
 - **Revisit** if a second consumer (e.g. push notifications, analytics) or measured load
   appears; the outbox then becomes the source for a relay into a broker.
+
+## D-015 Semantic retrieval (pgvector) not adopted
+Pre-registered experiment (`docs/experiments/semantic-retrieval.md`), eval-v1 test split:
+strict F1 0.7802 (match-2) vs 0.7784 (both semantic variants): -0.0018, below the +0.02 bar.
+Semantic candidates raised recall 0.986 -> 1.0 and hit@1 0.930 -> 0.937 at ~+2-7% latency,
+but lowered precision. Decision: keep match-2; the embedding index and variants remain only
+as a reproducible experiment (`recallgraph eval run --variant ...`), not in the API.
+Evidence: `evidence/experiments/semantic-retrieval-step19.json`.
+
+## D-016 Frontend without a framework
+The UI is plain HTML, CSS and JavaScript (ES modules, fetch) served by FastAPI.
+No React/Next.js: the product needs a handful of pages over an existing REST API.
