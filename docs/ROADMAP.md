@@ -27,7 +27,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 21 | Frontend foundation (React + JavaScript + HTML/CSS via Vite, no Next.js) | done |
 | 22 | Frontend product features (React) | done |
 | 23 | Security hardening | done |
-| 24 | End-to-end testing and coverage | planned |
+| 24 | End-to-end testing and coverage | done |
 | 25 | Full containerization | planned |
 | 26 | Observability | planned |
 | 27 | Performance benchmarks | planned |

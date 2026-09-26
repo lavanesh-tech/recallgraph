@@ -60,6 +60,7 @@ dev = [
     "mypy>=2.3.1",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
     "ruff>=0.16.9",
 ]
 
@@ -72,3 +73,9 @@ recallgraph = "recallgraph.cli:main"
 [[tool.mypy.overrides]]
 module = ["fastembed", "fastembed.*", "pgvector", "pgvector.*"]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["recallgraph"]
+
+[tool.coverage.report]
+fail_under = 83

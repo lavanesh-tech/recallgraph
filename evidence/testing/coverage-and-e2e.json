@@ -1,0 +1,26 @@
+{
+  "recorded_at": "2026-09-26T19:22:13Z",
+  "git_commit": "a8a7237",
+  "environment": "local macOS arm64, Docker Postgres",
+  "commands": [
+    "uv run pytest --cov=recallgraph",
+    "npm run coverage",
+    "npm run e2e"
+  ],
+  "backend": {
+    "tests": 196,
+    "line_coverage_pct": 84.95,
+    "gate": 83
+  },
+  "frontend": {
+    "unit_tests": 10,
+    "lines_pct": 88.75,
+    "branches_pct": 75.22,
+    "gate_lines": 85
+  },
+  "e2e": {
+    "playwright_tests": 4,
+    "passed": 4,
+    "stack": "real FastAPI + Postgres + Vite"
+  }
+}

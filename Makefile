@@ -53,3 +53,10 @@ web-dev:
 	cd frontend && npm run dev
 web-check:
 	cd frontend && npm run lint && npm test && npm run build
+
+.PHONY: coverage e2e
+coverage:
+	cd backend && uv run pytest -q --cov=recallgraph --cov-report=term --cov-report=json:coverage.json
+	cd frontend && npm run coverage
+e2e:
+	cd frontend && npm run e2e
