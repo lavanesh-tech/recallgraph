@@ -4,7 +4,7 @@ Handoff document for continuing work in a new conversation. Keep it current afte
 
 ## Snapshot
 - **Repo:** `~/Desktop/recallgraph` → https://github.com/lavanesh-tech/recallgraph (public)
-- **Current step:** 15 of 32 — Authentication and authorization (next)
+- **Current step:** 16 of 32 — Saved inventory (next)
 - **Next step:** 7 — CPSC ingestion pipeline (resilient HTTP client, idempotent raw storage via
   `RawRecordRepository`, CLI command, synthetic tests, one real ingestion run → `evidence/`)
 - **Git identity:** LAVANESH <lavanesh532@gmail.com>. User runs all git commands. No AI co-authors.
@@ -40,6 +40,11 @@ Modular monolith; FastAPI app factory `recallgraph.main:create_app`.
 | GET | /api/v1/companies?q= | company search ranked by recall count |
 | GET | /api/v1/companies/{id}/history | totals, first/last date, by year, by role, recent recalls |
 | POST | /api/v1/match | explainable product-to-recall matching (tiers, per-signal evidence) |
+| POST | /api/v1/auth/register | Argon2id user registration (201, 409, 422) |
+| POST | /api/v1/auth/login | access JWT (15 min) + rotating refresh token |
+| POST | /api/v1/auth/refresh | one-time refresh rotation; reuse revokes the family |
+| POST | /api/v1/auth/logout | revokes the session family (204) |
+| GET | /api/v1/auth/me | current user (Bearer) |
 
 ## Migrations
 - `0001_baseline` — empty chain start

@@ -18,7 +18,7 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 12 | Explainable matching engine | done |
 | 13 | Labeled evaluation set and harness | done |
 | 14 | Matching tuning | done |
-| 15 | Authentication and authorization | planned |
+| 15 | Authentication and authorization | done |
 | 16 | Saved inventory | planned |
 | 17 | Recall Radar core | planned |
 | 18 | Event-driven Radar (justification check first) | planned |

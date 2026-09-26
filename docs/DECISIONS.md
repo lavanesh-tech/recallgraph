@@ -75,3 +75,17 @@ not planned.
   title similarity breaks score ties. Results: `evidence/evaluation/tuning-match-1-vs-match-2.json`.
 - **Caveat:** product labels are incomplete (near-duplicate recalls of the same product count
   as FP), so product precision remains a lower bound.
+
+## D-011 Authentication and authorization
+- **Passwords:** Argon2id (argon2-cffi defaults), 12-128 chars; unknown-email logins verify a
+  dummy hash so both failure paths cost the same; one generic 401 message.
+- **Access tokens:** JWT HS256, 15 min, `iss`/`aud`/`exp`/`iat`/`jti`/`typ` required; the
+  accepted algorithm is pinned server-side (no `alg: none`, no algorithm confusion).
+- **Refresh tokens:** opaque random 256-bit values, stored only as SHA-256, 14 days, rotated on
+  every use. Reusing a spent token revokes the whole token family (theft signal) and is audited.
+  Row lock (`SELECT ... FOR UPDATE`) prevents double rotation.
+- **Secrets:** the dev JWT secret is refused in staging/production (settings validation).
+- **Audit log:** register, login success/failure, refresh, reuse detection, logout with request
+  id and client IP; never passwords, tokens or submitted emails.
+- **Known trade-off:** registration reports "email already registered" (409), which allows
+  account enumeration; login is rate-limited in Step 23.
