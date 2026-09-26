@@ -4,7 +4,7 @@ Handoff document for continuing work in a new conversation. Keep it current afte
 
 ## Snapshot
 - **Repo path:** `~/Desktop/recallgraph` (monorepo; backend in `backend/`)
-- **Current step:** 4 of 32 — CI and project documentation baseline (in progress)
+- **Current step:** 5 of 32 — Database platform (in progress)
 - **Next step:** 5 — Database platform (PostgreSQL via Compose on port 5433, async SQLAlchemy 2.x,
   Alembic, readiness endpoint, integration-test DB harness)
 - **Git identity:** LAVANESH <lavanesh532@gmail.com>. User runs all git commands. No AI co-authors.
@@ -36,6 +36,7 @@ None yet (Step 5).
 13 tests (pytest + HTTPX ASGITransport): config (2), health (1), problems (4), request context (6).
 
 ## Verification results (actual output)
+- Step 4 (2026-09-26): GitHub Actions run 36250702446 green (lint, format, mypy, pytest). Commits 65445f5, 41d8351 pushed to github.com/lavanesh-tech/recallgraph.
 - Step 3 (2026-09-26): `make check` → ruff clean, mypy strict clean (16 files), **13 passed**.
   Live server: health 200; unknown route 404 `application/problem+json` echoing `request_id`;
   JSON `request_completed` log lines.

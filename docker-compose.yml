@@ -1,0 +1,23 @@
+name: recallgraph
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: recallgraph
+      # Local development only; override via environment, never reuse outside this machine.
+      POSTGRES_PASSWORD: ${RECALLGRAPH_DB_PASSWORD:-recallgraph}
+      POSTGRES_DB: recallgraph
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recallgraph -d recallgraph"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

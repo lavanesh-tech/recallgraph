@@ -7,8 +7,8 @@ Status values: `done` (verified by real command output), `in progress`, `planned
 | 1 | Toolchain prerequisites | done |
 | 2 | Repository skeleton | done |
 | 3 | Backend foundation | done |
-| 4 | CI and project documentation baseline | in progress |
-| 5 | Database platform | planned |
+| 4 | CI and project documentation baseline | done |
+| 5 | Database platform | in progress |
 | 6 | Provenance data model | planned |
 | 7 | CPSC ingestion pipeline | planned |
 | 8 | Recall domain and normalization | planned |

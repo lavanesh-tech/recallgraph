@@ -1,3 +1,4 @@
+import os
 from collections.abc import AsyncIterator
 
 import pytest
@@ -7,15 +8,29 @@ from httpx import ASGITransport, AsyncClient
 from recallgraph.core.config import Settings
 from recallgraph.main import create_app
 
+_DEFAULT_TEST_DATABASE_URL = (
+    "postgresql+asyncpg://recallgraph:recallgraph@127.0.0.1:5433/recallgraph_test"
+)
+
+
+@pytest.fixture(scope="session")
+def test_database_url() -> str:
+    # Integration tests use a dedicated database, never the development one.
+    return os.environ.get("TEST_DATABASE_URL", _DEFAULT_TEST_DATABASE_URL)
+
 
 @pytest.fixture
-def settings() -> Settings:
-    return Settings(environment="test", log_level="WARNING", log_json=True)
+def settings(test_database_url: str) -> Settings:
+    return Settings(
+        environment="test", log_level="WARNING", log_json=True, database_url=test_database_url
+    )
 
 
 @pytest.fixture
-def app(settings: Settings) -> FastAPI:
-    return create_app(settings)
+async def app(settings: Settings) -> AsyncIterator[FastAPI]:
+    application = create_app(settings)
+    yield application
+    await application.state.engine.dispose()
 
 
 @pytest.fixture

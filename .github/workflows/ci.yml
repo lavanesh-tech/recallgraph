@@ -14,12 +14,29 @@ concurrency:
 
 jobs:
   backend:
-    name: Backend (lint, types, tests)
+    name: Backend (lint, types, migrations, tests)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: recallgraph
+          POSTGRES_PASSWORD: recallgraph
+          POSTGRES_DB: recallgraph_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U recallgraph -d recallgraph_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+asyncpg://recallgraph:recallgraph@127.0.0.1:5433/recallgraph_test
+      RECALLGRAPH_DATABASE_URL: postgresql+asyncpg://recallgraph:recallgraph@127.0.0.1:5433/recallgraph_test
     steps:
       - uses: actions/checkout@v5
 
@@ -32,13 +49,16 @@ jobs:
         run: uv sync --locked
 
       - name: Ruff lint
-        run: uv run ruff check .
+        run: uv run ruff check --no-cache .
 
       - name: Ruff format check
-        run: uv run ruff format --check .
+        run: uv run ruff format --check --no-cache .
 
       - name: Mypy (strict)
         run: uv run mypy src tests
 
-      - name: Pytest
+      - name: Alembic upgrade head
+        run: uv run alembic upgrade head
+
+      - name: Pytest (unit + integration)
         run: uv run pytest
