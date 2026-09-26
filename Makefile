@@ -45,3 +45,11 @@ mail-up:
 	docker compose up -d mailpit
 worker:
 	cd $(BACKEND) && uv run recallgraph worker run
+
+.PHONY: web-install web-dev web-check
+web-install:
+	cd frontend && npm ci
+web-dev:
+	cd frontend && npm run dev
+web-check:
+	cd frontend && npm run lint && npm test && npm run build
