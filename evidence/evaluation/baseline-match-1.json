@@ -1,0 +1,339 @@
+{
+  "recorded_at": "2026-09-26T16:42:36Z",
+  "git_commit": "b6ca8fd",
+  "environment": "local macOS arm64, Postgres 17, 40,348 real CPSC+NHTSA recalls",
+  "commands": [
+    "uv run recallgraph eval build --out ../evaluation/datasets/eval-v1.jsonl --seed 13",
+    "uv run recallgraph eval run --dataset ../evaluation/datasets/eval-v1.jsonl"
+  ],
+  "build": {
+    "format": "recallgraph-eval-1",
+    "path": "../evaluation/datasets/eval-v1.jsonl",
+    "seed": 13,
+    "cases": 400,
+    "by_kind": {
+      "identifier": 150,
+      "product": 150,
+      "negative_model": 50,
+      "negative_manufacturer": 50
+    }
+  },
+  "engine_version": "match-1",
+  "engine_config": {
+    "weights": {
+      "identifier": 0.4,
+      "manufacturer": 0.25,
+      "category": 0.1,
+      "lexical": 0.2,
+      "date": 0.05
+    },
+    "likely_threshold": 0.6,
+    "possible_threshold": 0.35,
+    "identity_min": 0.6,
+    "product_evidence_min": 0.5
+  },
+  "dataset": {
+    "path": "../evaluation/datasets/eval-v1.jsonl",
+    "sha256": "2251a1da15f154bbdedfabb20acc653d67e5911b4705e1093a170cab8fcf5b24",
+    "cases": 400,
+    "by_kind": {
+      "identifier": 150,
+      "negative_manufacturer": 50,
+      "negative_model": 50,
+      "product": 150
+    }
+  },
+  "result_limit": 20,
+  "duration_s": 21.96,
+  "mean_latency_ms": 54.9,
+  "metrics": {
+    "strict": {
+      "identifier": {
+        "cases": 150,
+        "positive_cases": 150,
+        "negative_cases": 0,
+        "tp": 151,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "false_negative_rate": 0.0,
+        "false_positive_rate": null,
+        "hit_at_1": 1.0,
+        "hit_at_5": 1.0
+      },
+      "negative_manufacturer": {
+        "cases": 50,
+        "positive_cases": 0,
+        "negative_cases": 50,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "false_negative_rate": null,
+        "false_positive_rate": 0.0,
+        "hit_at_1": null,
+        "hit_at_5": null
+      },
+      "negative_model": {
+        "cases": 50,
+        "positive_cases": 0,
+        "negative_cases": 50,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "false_negative_rate": null,
+        "false_positive_rate": 0.0,
+        "hit_at_1": null,
+        "hit_at_5": null
+      },
+      "overall": {
+        "cases": 400,
+        "positive_cases": 300,
+        "negative_cases": 100,
+        "tp": 297,
+        "fp": 923,
+        "fn": 4,
+        "precision": 0.2434,
+        "recall": 0.9867,
+        "f1": 0.3905,
+        "false_negative_rate": 0.0133,
+        "false_positive_rate": 0.0,
+        "hit_at_1": 0.8833,
+        "hit_at_5": 0.9633
+      },
+      "product": {
+        "cases": 150,
+        "positive_cases": 150,
+        "negative_cases": 0,
+        "tp": 146,
+        "fp": 923,
+        "fn": 4,
+        "precision": 0.1366,
+        "recall": 0.9733,
+        "f1": 0.2396,
+        "false_negative_rate": 0.0267,
+        "false_positive_rate": null,
+        "hit_at_1": 0.7667,
+        "hit_at_5": 0.9267
+      }
+    },
+    "lenient": {
+      "identifier": {
+        "cases": 150,
+        "positive_cases": 150,
+        "negative_cases": 0,
+        "tp": 151,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "false_negative_rate": 0.0,
+        "false_positive_rate": null,
+        "hit_at_1": 1.0,
+        "hit_at_5": 1.0
+      },
+      "negative_manufacturer": {
+        "cases": 50,
+        "positive_cases": 0,
+        "negative_cases": 50,
+        "tp": 0,
+        "fp": 641,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": null,
+        "f1": null,
+        "false_negative_rate": null,
+        "false_positive_rate": 1.0,
+        "hit_at_1": null,
+        "hit_at_5": null
+      },
+      "negative_model": {
+        "cases": 50,
+        "positive_cases": 0,
+        "negative_cases": 50,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null,
+        "f1": null,
+        "false_negative_rate": null,
+        "false_positive_rate": 0.0,
+        "hit_at_1": null,
+        "hit_at_5": null
+      },
+      "overall": {
+        "cases": 400,
+        "positive_cases": 300,
+        "negative_cases": 100,
+        "tp": 297,
+        "fp": 3235,
+        "fn": 4,
+        "precision": 0.0841,
+        "recall": 0.9867,
+        "f1": 0.155,
+        "false_negative_rate": 0.0133,
+        "false_positive_rate": 0.5,
+        "hit_at_1": 0.8833,
+        "hit_at_5": 0.9633
+      },
+      "product": {
+        "cases": 150,
+        "positive_cases": 150,
+        "negative_cases": 0,
+        "tp": 146,
+        "fp": 2594,
+        "fn": 4,
+        "precision": 0.0533,
+        "recall": 0.9733,
+        "f1": 0.1011,
+        "false_negative_rate": 0.0267,
+        "false_positive_rate": null,
+        "hit_at_1": 0.7667,
+        "hit_at_5": 0.9267
+      }
+    }
+  },
+  "errors": [
+    {
+      "case_id": "product-nhtsa-96V158002",
+      "kind": "product",
+      "expected": [
+        [
+          "nhtsa",
+          "96V158002"
+        ]
+      ],
+      "top": [
+        [
+          [
+            "nhtsa",
+            "25E069000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "25V586000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "24V926000"
+          ],
+          "likely"
+        ]
+      ]
+    },
+    {
+      "case_id": "product-nhtsa-98V062000",
+      "kind": "product",
+      "expected": [
+        [
+          "nhtsa",
+          "98V062000"
+        ]
+      ],
+      "top": [
+        [
+          [
+            "nhtsa",
+            "15V339000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "98V060000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "25V306000"
+          ],
+          "likely"
+        ]
+      ]
+    },
+    {
+      "case_id": "product-nhtsa-98V184000",
+      "kind": "product",
+      "expected": [
+        [
+          "nhtsa",
+          "98V184000"
+        ]
+      ],
+      "top": [
+        [
+          [
+            "nhtsa",
+            "88V105000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "84V150000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "84V147000"
+          ],
+          "likely"
+        ]
+      ]
+    },
+    {
+      "case_id": "product-nhtsa-67V067000",
+      "kind": "product",
+      "expected": [
+        [
+          "nhtsa",
+          "67V067000"
+        ]
+      ],
+      "top": [
+        [
+          [
+            "nhtsa",
+            "01V022000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "89V021000"
+          ],
+          "likely"
+        ],
+        [
+          [
+            "nhtsa",
+            "84V090000"
+          ],
+          "likely"
+        ]
+      ]
+    }
+  ]
+}
